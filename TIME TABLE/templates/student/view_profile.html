@@ -1,0 +1,79 @@
+{% extends 'student/student_home.html' %}
+{% block body %}
+
+<body><form action="" method="post" enctype="multipart/form-data">
+    <table width="800" class="table table-striped" style="margin-left: 50%">
+  <tr>
+    <th width="84" scope="row">Student Name</th>
+    <td width="187"><label for="textfield"></label>
+      <input type="text" name="textfield" id="textfield" class="form-control" required   value="{{ data['student_name'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">Photo</th>
+    <td><label for="fileField"></label>
+      <input type="file" name="fileField" id="fileField" /><img src="{{ data['photo'] }}" width="150" height="150" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">DOB</th>
+    <td><label for="textfield2"></label>
+      <input type="date" name="textfield2" id="textfield2" class="form-control" required   value="{{ data['dob'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">Gender</th>
+    <td><input type="radio" name="radio" id="radio" value="male" {% if data['gender']=="male" %}  checked {% endif %} readonly/>
+      <label for="radio">Male
+        <input type="radio" name="radio" id="radio" value="female" {% if data['gender']=="female" %}  checked {% endif %} readonly/>
+      Female</label></td>
+  </tr>
+{#  <tr>#}
+{#    <th scope="row">Qualification</th>#}
+{#    <td><label for="textfield3"></label>#}
+{#      <input type="text" name="textfield3" class="form-control" required  id="textfield3" value="{{ data['qualification'] }}"/></td>#}
+{#  </tr>#}
+  <tr>
+    <th scope="row">Place</th>
+    <td><label for="textfield4"></label>
+      <input type="text" name="textfield4" class="form-control" required  id="textfield4" value="{{ data['place'] }}" readonly/></td>
+  </tr>
+
+  <tr>
+    <th scope="row">Post</th>
+    <td><label for="textfield5"></label>
+      <input type="text" name="textfield5" class="form-control" required  id="textfield5" value="{{ data['post'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">Pincode</th>
+    <td><label for="textfield6"></label>
+      <input type="tel" pattern="[0-9]{6}" name="textfield6" class="form-control" required  id="textfield6" value="{{ data['pincode'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">District</th>
+    <td><label for="textfield6"></label>
+      <input type="tel" pattern="[0-9]{6}" name="textfield6" class="form-control" required  id="textfield6" value="{{ data['district'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">Email-Id</th>
+    <td><label for="textfield7"></label>
+      <input type="email" name="textfield7" class="form-control" required  id="textfield7" value="{{ data['email_id'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">Contact Number</th>
+    <td><label for="textfield8"></label>
+      <input type="tel" pattern="[6-9][0-9]{9}" name="textfield8" id="textfield8" class="form-control" required  value="{{ data['phone_number'] }}" readonly/></td>
+  </tr>
+
+<tr>
+    <th width="125" scope="row">Course</th>
+    <td width="237"><label for="course"></label>
+     <select name="select5" class="form-control" required readonly>
+         {% for i in data1 %}
+         <option value="{{ i['course_id'] }}" {% if data['course_id']==i['course_id'] %}selected{% endif %}>{{ i['course_name'] }}</option>
+         {% endfor %}
+     </select> </td>
+  </tr>
+
+
+</table>
+</form>
+</body>
+{% endblock %}

@@ -1,0 +1,90 @@
+<body >
+
+    <br><br><br><br><br>
+    <form action="/hodviewtimetablepost" method="post">
+        
+        <div style="max-width: 600px; margin: 0 auto;">
+            <h3 style="text-align: center; font-family:monospace">semester-{{ sem }}</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse ;  border: 1px solid #ddd;">
+                    <thead>
+                        <tr style="text-align: center; background-color: #f2f2f2;">
+                            <th width="156" style="border: 1px solid #ddd;">Days/Hours</th>
+                            <th style="display: none; border: 1px solid #ddd;">1</th>
+                            <th style="display: none; border: 1px solid #ddd;">2</th>
+                            <th style="display: none; border: 1px solid #ddd;">3</th>
+                            <th style="display: none; border: 1px solid #ddd;">4</th>
+                            <th style="display: none; border: 1px solid #ddd;">5</th>
+                            <th style="display: none; border: 1px solid #ddd;">6</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="text-align: center;">
+                            <th scope="row" style="border: 1px solid #ddd;">Monday</th>
+                            {% for i in mon %}
+                            <td style="border: 1px solid #ddd;">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr style="text-align: center;">
+                            <th scope="row" style="border: 1px solid #ddd;">Tuesday</th>
+                            {% for i in tue %}
+                            <td style="border: 1px solid #ddd;">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr style="text-align: center;">
+                            <th scope="row" style="border: 1px solid #ddd;">Wednesday</th>
+                            {% for i in wed %}
+                            <td style="border: 1px solid #ddd;">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr style="text-align: center;">
+                            <th scope="row" style="border: 1px solid #ddd;">Thursday</th>
+                            {% for i in thur %}
+                            <td style="border: 1px solid #ddd;">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr style="text-align: center;">
+                            <th scope="row" style="border: 1px solid #ddd;">Friday</th>
+                            {% for i in fri %}
+                            <td style="border: 1px solid #ddd;">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        
+    </form>
+</body>
+
+
+<style>
+    /* Default styles for larger screens */
+
+
+    body {
+        background:url("/static/webvuw.png");
+        background-size: cover; /* Adjust as needed */
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* Optional: keeps the background fixed while scrolling */
+    }
+    table {
+        width: 50%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    /* Styles for smaller screens (less than 600px width) */
+    @media only screen and (max-width: 600px) {
+        table {
+            font-size: 5px; /* Adjust font size for smaller screens */
+        }
+    }
+  
+</style>

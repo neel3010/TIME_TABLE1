@@ -1,0 +1,74 @@
+{% comment %} {% extends 'hod/homepage2.html' %}
+{% block body %}
+
+
+<body>
+<div align="center">
+<form action="" method="post" enctype="multipart/form-data">
+    <table  align="center" class="table table-striped table-bordered" style="margin-left: 50%" width="1000">
+  <tr>
+    <th scope="row">Name</th>
+    <td><label for="textfield"></label>
+      <input type="text" name="textfield" id="textfield" class="form-control" required /></td>
+  </tr>
+  <tr>
+    <th scope="row">Photo</th>
+    <td><label for="fileField"></label>
+       <input type="file" name="fileField" id="fileField" class="form-control" required/></td>
+  </tr>
+
+
+  <tr>
+    <th scope="row">Qualification</th>
+    <td><label for="textfield3"></label>
+      <input type="text" name="textfield3" id="textfield3" required class="form-control" /></td>
+  </tr>
+  <tr>
+    <th scope="row">District </th>
+    <td><label for="select"></label>
+      <select name="select" id="select" class="form-control">
+        <option>Thiruvananthapuram</option>
+        <option>Kollam</option>
+        <option>Alapuzhha</option>
+        <option>Pathanamthitta</option>
+        <option>Kottayam</option>
+        <option>Idukki</option>
+        <option>Ernakulam</option>
+        <option>Thrissur</option>
+        <option>Palakkad</option>
+        <option>Malappuram</option>
+        <option>Kozhikode</option>
+        <option>Wayanad</option>
+        <option>Kannur</option>
+        <option>Kasargod</option>
+      </select></td>
+  </tr>
+  <tr>
+    <th scope="row">Place</th>
+    <td><label for="textfield2"></label>
+      <input type="text" name="textfield2" id="textfield2"class="form-control" required /></td>
+  </tr>
+  <tr>
+    <th scope="row">Email-id</th>
+    <td><label for="textfield7"></label>
+      <input type="email" name="textfield7" id="textfield7" class="form-control" required/></td>
+  </tr>
+  <tr>
+    <th scope="row">Contact Number</th>
+    <td><label for="textfield8"></label>
+      <input type="tel" name="textfield8" id="textfield8" class="form-control" required pattern="[6-9][0-9]{9}"/></td>
+  </tr>
+
+        <tr>
+    <th scope="row">Password</th>
+    <td><label for="textfield8"></label>
+      <input type="password" name="textfield9" id="textfield8" class="form-control" required /></td>
+  </tr>
+  <tr>
+    <th colspan="2" scope="row"><label></label><div align="center" ><center> <input type="submit" class="btn btn-primary" name="button" id="button" value="Register" /></center></div></th>
+    </tr>
+</table>
+</form>
+</div>
+</body>
+{% endblock %} {% endcomment %}

@@ -1,0 +1,29 @@
+{% extends 'student/student_home.html' %}
+{% block body %}
+<body>
+<form id="form1" name="form1" method="post" action="">
+  <table width="926" border="1" class="table table-striped">
+    <tr>
+      <th width="30" scope="col">#</th>
+      <th width="51" scope="col">Staff Name</th>
+      <th width="66" scope="col">Subject</th>
+        <th width="66" scope="col">sem</th>
+
+{#      <th width="38" scope="col">Photo</th>#}
+      <th width="39" scope="col">&nbsp;</th>
+      <th width="39" scope="col">&nbsp;</th>
+    </tr>
+      {% for i in data %}
+    <tr>
+      <td>&nbsp;{{ loop.index }}</td>
+      <td>&nbsp;{{ i['staff_name'] }}</td>
+      <td>&nbsp;{{ i['subject_name'] }}</td>
+        <td>{{i['semester']}}</td>
+      <td><p><a href="/student_view_note/{{ i['allocate_id'] }}" class="btn btn-success">View Notes</a></p></td>
+      <td><p><a href="/student_view_work/{{ i['allocate_id'] }}" class="btn btn-success">View Works</a></p></td>
+    </tr>
+      {% endfor %}
+  </table>
+</form>
+</body>
+{% endblock %}

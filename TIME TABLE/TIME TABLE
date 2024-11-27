@@ -1,0 +1,2760 @@
+import smtplib
+from email.mime.text import MIMEText
+from api import api
+from flask import Flask, render_template, request, session, jsonify, redirect
+import random
+import datetime
+from jackal_copy import jackal_copy
+from grandmaster import grandmaster,Db as ndb
+from DBConnection import Db
+from database import *
+app = Flask(__name__)
+app.secret_key="key"
+
+app.register_blueprint(api)
+
+@app.route('/')
+def star():
+    return render_template('home.html')
+@app.route('/log')
+def login():
+    return render_template('login_index.html')
+
+@app.route('/login_post',methods=['post'])
+def login_post():
+    u=request.form['textfield']
+    p=request.form['textfield2']
+    db=Db()
+    qry=db.selectOne("select * from login where username='"+u+"' and password='"+p+"'")
+    if qry is not None:
+        session['lid']=qry['login_id']
+        session['lg']='ln'
+        if qry['usertype']=="admin":
+            session['log'] = "lo"
+            return redirect('/ADMINHOME')
+        # elif qry['usertype']=="hod":
+        #     session['log'] = "lo"
+        #     return redirect('/hod_home')
+        elif qry['usertype'] == "HOD":
+            session['log'] = "lo"
+            qr= "select * from staff where login_id='%s'"%(session['lid'])
+            res=select(qr)
+            session['staff_id']=res[0]['staff_id']
+            
+            session['lid']=qry['login_id']
+            return redirect('/hod_home')
+        elif qry['usertype'] == "staff":
+            session['log'] = "lo"
+            return redirect('/staff_home')
+        elif qry['usertype'] == "student":
+            session['log'] = "lo"
+            return redirect('/student_home')
+
+        else:
+            return '''<script>alert("invalid user");window.location='/'</script>'''
+    else:
+        return '''<script>alert("invalid user");window.location='/'</script>'''
+
+
+@app.route('/ADMINHOME')
+def hello_world():
+    if session['log']=='lo':
+        return render_template('admin/homepage.html')
+    else:
+        return render_template('login_index.html')
+
+@app.route('/hod_home')
+
+def hod_home():
+    if session['log'] == 'lo':
+        return render_template('hod/homepage2.html')
+    else:
+        return render_template('login_index.html')
+
+@app.route('/ADMINHOME2',methods=['post'])
+def hello_world2():
+    if session['log'] == 'lo':
+        db=Db()
+        n=request.form['textfield']
+        DOB=request.form['textfield2']
+        Gender=request.form['radio']
+        Qualification=request.form['textfield3']
+        District=request.form['select']
+        Place=request.form['textfield4']
+        Post=request.form['textfield5']
+        Pincode=request.form['textfield6']
+        Emailid=request.form['textfield7']
+        ContactNumber=request.form['textfield8']
+        Photo=request.files['fileField']
+        password=request.form['textfield9']
+        dept=request.form['dept']
+        # try:
+        #     gmail = smtplib.SMTP('smtp.gmail.com', 587)
+        #
+        #     gmail.ehlo()
+        #
+        #     gmail.starttls()
+        #
+        #     gmail.login('drishyaanish10@gmail.com', 'Drishya2001')  # mail that send password
+        #
+        # except Exception as e:
+        #     # print("Couldn't setup email!!" + str(e))
+        #
+        # msg = MIMEText("Your OTP is " + str(password))  # content
+        #
+        # msg['Subject'] = 'Verification'
+        #
+        # msg['To'] = Emailid
+        #
+        # msg['From'] = 'drishyaanish10@gmail.com'
+        #
+        # try:
+        #
+        #     gmail.send_message(msg)
+        #
+        # except Exception as e:
+        #
+        #     # print("COULDN'T SEND EMAIL", str(e))
+        import datetime
+        date=datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+        # Photo.save(r"D:\project\final\ORGINAL ATGS 100\static\images\\"+date+".jpg")
+        # Photo.save(r"D:\project\TIME TABLE\static\images\\"+date+".jpg")
+        Photo.save("static\images\\"+date+".jpg")
+        path = "/static/images/" + date + ".jpg"
+        qry="insert into login (username,password) VALUES('','"+Emailid+"','"+str(password)+"','hod')"
+        res=db.insert(qry)
+        qry="insert into hod (login_id,name,phone_number,dob,qualification,emailid,gender,place,post,pin,district,photo,dept_id) VALUES('"+str(res)+"','"+n+"','"+ContactNumber+"','"+DOB+"','"+Qualification+"','"+Emailid+"','"+Gender+"','"+Place+"','"+Post+"','"+Pincode+"','"+District+"','"+str(path)+"','"+dept+"')"
+        res=db.insert(qry)
+        return '''<script>alert("successfull");window.location='/ADMINHOME'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+#************************************************************Add course$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+
+@app.route('/add_batch',methods=['get','post'])
+def add_batch():
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            start=request.form['start']
+            end=request.form['end']
+            db=Db()
+            # db.insert("INSERT INTO course (course_name, department_id) VALUES ('" + c + "', '" + dept + "')")
+            db.insert("insert into batches values(null,'%s','%s')"%(start,end))
+            
+            return '''<script>alert("ADDED SUCCESSFULLY");window.location="/ADMINHOME"</script>'''
+      
+        return render_template('admin/batch_reg.html')
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/viewbatches')
+def viewbatches():
+    if session['log'] == 'lo':
+        db = Db()
+        qry = "select * from batches"
+        res = db.select(qry)
+        return render_template('admin/batch view.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/db/<a>')
+def deletbatch(a):
+    if session['log'] == 'lo':
+        db=Db()
+        # qry = "delete from batches where batch='" + a + "'"
+        qry="delete from batches where batch_id='%s'"%(a)
+        db.delete(qry)
+        # qr="delete from login where login_id='"+a+"'"
+        # db.delete(qr)
+        return '''<script>alert("deleted successfully");window.location='/viewbatches'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/editbatch/<a>')
+def editbatch(a):
+    if session['log'] == 'lo':
+        db=Db()
+        # qr = "select * from course,department where course.department_id=department.department_id and course_id='"+a+"'"
+        qr = "select * from  batches where batch_id='%s'"%(a)
+        res=db.select(qr)
+        # print(res,'$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+        return render_template('admin/batches update.html',data=res)
+    else:
+        return render_template('login_index.html')
+    
+@app.route('/ADMINHOME5/<a>',methods=['post'])
+def ADMINHOME5(a):
+    if session['log'] == 'lo':
+        db=Db()
+        start=request.form['start']
+        end=request.form['end']
+        # qry = db.update("update course set course_name='"+n+"',department_id='"+dept+"' where course_id='"+a+"'")
+        qry = db.update("update batches set start_year='%s',end_year='%s' where batch_id='%s'"%(start,end,a))
+        return '''<script>alert("updated successfull");window.location='/viewbatches'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+
+
+#************************************************************ end  Add course$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+@app.route('/add_semester',methods=['get','post'])
+def add_semester():
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            sem=request.form['sem']
+            db=Db()
+            # db.insert("INSERT INTO course (course_name, department_id) VALUES ('" + c + "', '" + dept + "')")
+            db.insert("insert into semester values(null,'%s')"%(sem))
+            
+            return '''<script>alert("ADDED SUCCESSFULLY");window.location="/ADMINHOME"</script>'''
+       
+        return render_template('admin/semester.html')
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/viewsem')
+def viewsem():
+    if session['log'] == 'lo':
+        db = Db()
+        qry = "select * from semester"
+        res = db.select(qry)
+        return render_template('admin/semester view.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/ds/<a>')
+def deletesem(a):
+    if session['log'] == 'lo':
+        db=Db()
+        # qry = "delete from batches where batch='" + a + "'"
+        qry="delete from semester where sem_id='%s'"%(a)
+        db.delete(qry)
+        # qr="delete from login where login_id='"+a+"'"
+        # db.delete(qr)
+        return '''<script>alert("deleted successfully");window.location='/viewsem'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/editsem/<a>')
+def editsem(a):
+    if session['log'] == 'lo':
+        db=Db()
+        # qr = "select * from course,department where course.department_id=department.department_id and course_id='"+a+"'"
+        qr = "select * from  semester where sem_id='%s'"%(a)
+        res=db.select(qr)
+        # print(res,'$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+        return render_template('admin/sem update.html',data=res)
+    else:
+        return render_template('login_index.html')
+    
+@app.route('/ADMINHOME7/<a>',methods=['post'])
+def ADMINHOME7(a):
+    if session['log'] == 'lo':
+        db=Db()
+        sem=request.form['sem']
+        # qry = db.update("update course set course_name='"+n+"',department_id='"+dept+"' where course_id='"+a+"'")
+        qry = db.update("update semester set semester='%s' where sem_id='%s'"%(sem,a))
+        return '''<script>alert("updated successfull");window.location='/viewsem'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+
+
+
+
+
+
+#************************************************************ end  Add semester$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+# @app.route('/addprincipal')
+# def addprincipal():
+#     if session['log'] == 'lo':
+#         db=Db()
+#         res=db.select("select * from department")
+#         return render_template('admin/principal register.html',data=res)
+#     else:
+#         return render_template('login_index.html')
+    
+# @app.route('/admin_search_by_departments',methods=['get','post'])
+# def admin_search_by_departments():
+#     return render_template('admin_search_by_departments.html')
+
+@app.route('/admin_view_staff',methods=['get','post'])
+def admin_view_staff():
+    if session['log'] == 'lo':
+        db=Db()
+        datad={}
+        qr="""SELECT * FROM staff INNER JOIN assign_subject USING(staff_id)
+INNER JOIN SUBJECT USING(subject_id) INNER JOIN course USING(course_id)
+INNER JOIN department USING(department_id)"""
+        res=db.select(qr)
+        
+        if "action" in request.args:
+            action=request.args['action']
+            id=request.args['id']
+        else:
+            action=None
+        
+        if action=="accept":
+            # print("@#$%^&*")
+            p="update login set usertype='teacher' where login_id='%s'"%(id)
+            db.update(p)
+            p="update staff set status='accepted' where login_id='%s'"%(id)
+            db.update(p)
+
+        if 'submit' in request.form:
+            search=request.form['serch']+'%'
+            s="SELECT * FROM staff INNER JOIN assign_subject USING(staff_id) INNER JOIN `subject` using(subject_id) INNER JOIN course USING(course_id) INNER JOIN department USING(department_id) WHERE department_name like '%s' GROUP BY staff_id"%(search)
+            result=select(s)
+            print("___________",result)
+            datad['search']=select(s)
+            if not result:
+                return '''<script>alert("No search results");window.location='/admin_view_staff';</script>'''
+            else:
+                   
+                return render_template('admin/staff view.html',data=res,datad=datad)
+        return render_template('admin/staff view.html',data=res,datad=datad)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/admin_view_t_attendance')
+def admin_view_t_attendance():
+    data={}
+    db=Db()
+    a="select * from teacher_attendance inner join staff using(staff_id)"
+    s=db.select(a)
+    data['vv']=s
+    return render_template('admin/admin_view_t_attendance.html',data=data)
+
+
+
+
+@app.route('/adddepartment')
+def adddepartment():
+    if session['log'] == 'lo':
+        return render_template('admin/dep reg.html')
+    else:
+        return render_template('login_index.html')
+
+@app.route('/ADMINHOME3',methods=['post'])
+def hello_world3():
+    if session['log'] == 'lo':
+        db=Db()
+        n=request.form['textfield']
+        details=request.form['textfield7']
+        qry = "INSERT INTO department (department_name, details) VALUES ('" + n + "', '" + details + "')"
+
+        res = db.insert(qry)
+        return '''<script>alert("successfull");window.location='/ADMINHOME'</script>'''
+    else:
+        return render_template('login_index.html')
+
+@app.route('/viewdepartment')
+def viewdepartment():
+    if session['log'] == 'lo':
+
+        db = Db()
+        qr = "select * from department"
+        res = db.select(qr)
+        return render_template('admin/dept view.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/dd/<a>')
+def deletedepartment(a):
+    if session['log'] == 'lo':
+
+        db=Db()
+        qry = "delete from department where department_id='" + a + "'"
+        db.delete(qry)
+        return '''<script>alert("deleted successfully");window.location='/ADMINHOME'</script>'''
+    else:
+        return render_template('login_index.html')
+
+@app.route('/editdepartment/<a>')
+def editdepartment(a):
+    if session['log'] == 'lo':
+
+        db=Db()
+        qr = "select * from department where department_id='"+a+"'"
+        res=db.selectOne(qr)
+        return render_template('admin/dep update.html',data=res)
+    else:
+        return render_template('login_index.html')
+@app.route('/ADMINHOME3/<a>',methods=['post'])
+def ADMINHOME3(a):
+    if session['log'] == 'lo':
+        db=Db()
+        n = request.form['textfield']
+        details = request.form['textfield7']
+        qry = db.update("update department set department_name='"+n+"',details='"+details+"' where department_id='"+a+"'")
+        return '''<script>alert("updated successfull");window.location='/viewdepartment'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+# @app.route('/addcourse')
+# def addcourse():
+#     if session['lg'] == 'ln':
+#         db=Db()
+#         qr="select * from department"
+#         res=db.select(qr)
+#         # print(res)
+#         return render_template('admin/course_reg.html', data=res)
+#     else:
+#         return render_template('login_index.html')
+# @app.route('/ADMINHOME4',methods=['post'])
+# def hello_world4():
+#     if session['lg'] == 'ln':
+#         db=Db()
+#         n=request.form['textfield']
+#         qry = "insert into course VALUES ('','"+n+"','')"
+#         res = db.insert(qry)
+#         return '''<script>alert("successfull");window.location='/ADMINHOME'</script>'''
+#     else:
+#         return render_template('login_index.html')
+
+
+@app.route('/add_course',methods=['get','post'])
+def add_course():
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            dept=request.form['dept']
+            c=request.form['textfield']
+            db=Db()
+            db.insert("INSERT INTO course (course_name, department_id) VALUES ('" + c + "', '" + dept + "')")
+            return '''<script>alert("ADDED SUCCESSFULLY");window.location="/ADMINHOME"</script>'''
+        else:
+            db=Db()
+            res=db.select("select * from department")
+            return render_template('admin/course_reg.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/viewcourse')
+def viewcourse():
+    if session['log'] == 'lo':
+        db = Db()
+        qr = "select * from course,department where course.department_id=department.department_id"
+        res = db.select(qr)
+        return render_template('admin/course view.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/dc/<a>')
+def deletecourse(a):
+    if session['log'] == 'lo':
+        db=Db()
+        qry = "delete from course where course_id='" + a + "'"
+        db.delete(qry)
+        qr="delete from login where login_id='"+a+"'"
+        db.delete(qr)
+        return '''<script>alert("deleted successfully");window.location='/ADMINHOME'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/editcourse/<a>')
+def editcourse(a):
+    if session['log'] == 'lo':
+        db=Db()
+        qr = "select * from course,department where course.department_id=department.department_id and course_id='"+a+"'"
+        res1=db.select("select * from department")
+        res=db.selectOne(qr)
+        return render_template('admin/course update.html',data=res,data1=res1)
+    else:
+        return render_template('login_index.html')
+@app.route('/ADMINHOME4/<a>',methods=['post'])
+def ADMINHOME4(a):
+    if session['log'] == 'lo':
+        db=Db()
+        n = request.form['textfield']
+        dept = request.form['dept']
+        qry = db.update("update course set course_name='"+n+"',department_id='"+dept+"' where course_id='"+a+"'")
+        return '''<script>alert("updated successfull");window.location='/viewcourse'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/generatetimetable')
+def generationtimetable():
+    db = Db()
+    res = db.select("select * from course order by course_name")
+    # print("1",res)
+    return  render_template('admin/generation_timetable_copy.html',data=res)
+
+@app.route('/generatetimetablepost',methods=['post'])
+def generatetimetablepost():
+    db=Db()
+    cid= request.form['select1']
+    sem=int(request.form['select'])
+
+    dd="delete from timetable where subject_id in (select subject_id from subject where semester='"+str(sem)+"' and course_id='"+cid+"')"
+    q=db.delete(dd)
+    # print(q,"dddddddd")
+    if sem==1 or sem == 2:
+        # try:
+            g(cid,str(sem))
+        # except Exception as e:
+        #     pass
+    elif sem ==3 or sem == 4 or sem ==5:
+        gs(cid,str(sem))
+    else:
+        gt(cid,str(sem))
+    sem=str(sem)
+    dept=str(cid)
+    jq=jackal_copy()
+    m = 0
+    t = 0
+    w = 0
+    th = 0
+    f = 0
+    # s = 0
+    mon1 = []
+    tue1 = []
+    wed1 = []
+    thur1 = []
+    fri1 = []
+    # sat1 = []
+
+    # res = db.select("select * from course")
+    # jq = jackal_copy()
+    mon = jq.getlogmondaystaff(sem, dept)
+    for i in mon:
+        # print(i)
+        m += 1
+        if m == 7:
+            break;
+        else:
+            mon1.append(i)
+    print (mon1)
+    tue = jq.getlogtuesdaystaff(sem, dept)
+    for i1 in tue:
+        t += 1
+        if t == 7:
+            break;
+        else:
+            tue1.append(i1)
+
+    print (tue1)
+    wed = jq.getlogweddaystaff(sem, dept)
+    for i2 in wed:
+        w += 1
+        if w == 7:
+            break;
+        else:
+            wed1.append(i2)
+
+
+    print (wed1)
+    thur = jq.getlogthurdaystaff(sem, dept)
+    for i3 in thur:
+        th += 1
+        if th == 7:
+            break;
+        else:
+            thur1.append(i3)
+    print (thur1)
+    fri = jq.getlogfridaystaff(sem, dept)
+    for i4 in fri:
+        f += 1
+        if f == 7:
+            break;
+        else:
+            fri1.append(i4)
+    print (fri1)
+    # sat = jq.getlogsatdaystaff(sem, dept)
+    # for i5 in sat:
+    #     s += 1
+    #     if s == 7:
+    #         break;
+    #     else:
+    #         sat1.append(i5)
+    # # print(sat1)
+
+
+
+    # mon=jq.getlogmonday(sem,dept)
+    # tue=jq.getlogtuesday(sem,dept)
+    # wed=jq.getlogwedday(sem,dept)
+    # thur=jq.getlogthurday(sem,dept)
+    # fri=jq.getlogfriday(sem,dept)
+    # sat=jq.getlogsatday(sem,dept)
+    s = "select * from course"
+    c = Db()
+    res = c.select(s)
+    return render_template("admin/generation_timetable_copy.html",mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,data=res,sem=sem)
+    # return render_template("admin/generation_timetable_copy.html",mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sat=sat1,data=res,sem=sem)
+
+def g(cid,sem):
+    jq = jackal_copy()
+    m = grandmaster()
+    rows, cols = (6, 6)
+
+    arr = [[0] * cols] * rows
+    # print(arr)
+    list1 = []
+
+    tor=jq.getlabsubid(str(sem),cid)
+    # print("2",tor)
+    for i in tor:
+        day,hr=jq.getrandomday()
+        # print("3",day)
+        # print("4",hr)
+        if hr==1:
+            for ii in range(1,4):
+                jq.logman(day, i["subject_id"], ii)
+        if hr==4:
+            for ii in range(4,7):
+                jq.logman(day, i["subject_id"], ii)
+    # print("Overr")
+    hope=[]
+    mlis=[]
+    for j in tor:
+        mlis.append(j["subject_id"])
+    # print("2nddd")
+    for i in range(0, 6):
+        rt = jq.getsubid(str(sem), cid)
+        # # print(rt)
+        for j in rt:
+            list1.append(j["subject_id"])
+        day = m.getday(i)
+        for k in range(0, 6):
+            list1, arr[i][k] = m.getrandomfirst(list1)
+            qq = "select subject.* from subject inner join timetable on subject.subject_id=timetable.subject_id where timetable.day='"+day+"' and timetable.hour='"+str(k + 1)+"' and subject.course_id='"+str(cid)+"' and subject.semester='"+str(sem)+"'"
+            db=Db()
+            # # print(qq)
+            rest=db.select(qq)
+            # print("5",rest)
+            if rest == hope:
+                # print("yes", arr[i][k])
+                jq.logman(day, arr[i][k], str(k + 1))
+
+    db=Db()
+    dd=db.select("select subject.* from subject inner join timetable on subject.subject_id=timetable.subject_id where subject.course_id='"+str(cid)+"' and subject.semester='"+str(sem)+"'")
+    # print("Last ", len(dd))
+    return "ok"
+
+def gs(cid,sem):
+    db=Db()
+    jq = jackal_copy()
+    m = grandmaster()
+    rows, cols = (5, 6)
+    # rows, cols = (6, 6)
+    arr = [[0] * cols] * rows
+    # print(arr)
+    list1 = []
+
+    tor = jq.getlabsubid(str(sem), cid)
+    # print(tor)
+    for i in tor:
+        day, hr = jq.getrandomday()
+        if hr == 1:
+            qq = "select timetable.*,subject.semester,subject.subject_name from timetable,subject where subject.subject_id=timetable.subject_id and subject.semester='" + sem + "' and timetable.day='" + day + "' and subject.course_id='" + cid + "' and timetable.hour='" + str(hr) + "'"
+            s = Db()
+            rerr = s.selectOne(qq)
+            # print("7",rerr)
+            if rerr is None:
+                for ii in range(1, 4):
+                    jq.logman(day, i["subject_id"], ii)
+        if hr == 4:
+
+            qq = "select timetable.*,subject.semester,subject.subject_name from timetable,subject where subject.subject_id=timetable.subject_id and subject.semester='" + sem + "' and timetable.day='" + day + "' and subject.course_id='" + cid + "' and timetable.hour='" + str(hr) + "'"
+            s = Db()
+            rerr = s.selectOne(qq)
+            if rerr is None:
+                for ii in range(4, 7):
+                    jq.logman(day, i["subject_id"], ii)
+    hope = []
+    duo=[]
+    dp = jq.getsubid(str(sem), cid)
+    for j in dp:
+        duo.append(j["subject_id"])
+    ah=random.choice(duo)
+    duo.append(ah)
+    for i in range(0, 6):
+        rt = jq.getsubid(str(sem), cid)
+        # print(rt)
+        for j in rt:
+            list1.append(j["subject_id"])
+
+        for k in range(0, 5):
+            list1, pol,day = m.getrandomsecond(list1,str(i),k+1,sem)
+            qq = "select subject.* from subject inner join timetable on subject.subject_id=timetable.subject_id where timetable.day='" + day + "' and timetable.hour='" + str(k + 1) + "'and subject.course_id='" + str(cid) + "' and subject.semester='" + str(sem) + "'"
+            db = Db()
+            # # print(qq)
+            rest = db.selectOne(qq)
+            # print("8",rest)
+            # print("ressssssssssssssssssssssssss----------------------------------------------")
+            if rest is None:
+                # print("yes")
+                # print("arr[i][k]")
+                # print(pol)
+                jq.logman(day, pol, str(k + 1))
+        qq="select count(timetable.subject_id) as cnt from timetable,subject where subject.subject_id=timetable.subject_id and subject.semester='"+str(sem)+"' and timetable.day='"+day+"' and subject.course_id='"+cid+"'"
+        cc=db.selectOne(qq)
+        # print("9",cc)
+        cnt=int(cc["cnt"])
+        if cnt<6:
+            pq=random.choice(duo)
+            jq.logman(day,pq,'6')
+            duo.remove(pq)
+
+    return "ok"
+
+def gt(cid,sem):
+    jq = jackal_copy()
+    m = grandmaster()
+    rows, cols = (6, 6)
+    arr = [[0] * cols] * rows
+    # print(arr)
+    list1 = []
+    tor = jq.getlabsubid(str(sem), cid)
+    for i in tor:
+        day, hr = jq.getrandomday()
+        if hr == 1:
+            for ii in range(1, 4):
+                jq.logman(day, i["subject_id"], ii)
+        if hr == 4:
+            for ii in range(4, 7):
+                jq.logman(day, i["subject_id"], ii)
+    hope = []
+    duo=[]
+    dp = jq.getsubid(str(sem), cid)
+    for j in dp:
+        duo.append(j["subject_id"])
+    oppo=duo.copy()
+    # print(len(duo))
+    # print("lemof duo")
+    for i in range(len(oppo)):
+        duo.append(oppo[i])
+    for i in range(len (oppo)):
+        duo.append(oppo[i])
+    for i in range(len (oppo)):
+        duo.append(oppo[i])
+
+    # print(oppo)
+    # print(duo)
+    # print((len(duo)))
+    # print("duo")
+    for i in range(0, 6):
+        rt = jq.getsubid(str(sem), cid)
+        # # print(rt)
+        for j in rt:
+            list1.append(j["subject_id"])
+        # # print("i"+str(i))
+
+
+        for k in range(0, 4):
+
+            list1, arr[i][k],day = m.getrandomthird(list1,str(i),k+1,sem,cid)
+            # print("hello")
+            qq = "select subject.* from subject inner join timetable on subject.subject_id=timetable.subject_id where timetable.day='" + day + "' and timetable.hour='" + str(k + 1) + "'and subject.course_id='" + str(cid) + "' and subject.semester='" + str(sem) + "'"
+            db = Db()
+            # # print(qq)
+            rest = db.selectOne(qq)
+            # # print(rest)
+            if rest is None:
+                # print("yes")
+                jq.logman(day, arr[i][k], str(k + 1))
+        qq = "select count(timetable.subject_id) as cnt from timetable,subject where subject.subject_id=timetable.subject_id and subject.semester='" + sem + "' and timetable.day='" + day + "' and subject.course_id='" + cid + "'"
+        cc = db.selectOne(qq)
+        cnt = int(cc["cnt"])
+        if cnt < 6:
+            pq = random.choice(duo)
+            jq.logman(day, pq, '5')
+            duo.remove(pq)
+        qq = "select count(timetable.subject_id) as cnt from timetable,subject where subject.subject_id=timetable.subject_id and subject.semester='" + sem + "' and timetable.day='" + day + "' and subject.course_id='" + cid + "'"
+        cc = db.selectOne(qq)
+        cnt = int(cc["cnt"])
+        if cnt < 6:
+            pq = random.choice(duo)
+            jq.logman(day, pq, '6')
+            duo.remove(pq)
+    return "ok"
+
+# view timetable
+@app.route('/hodviewtimetable')
+def hodviewtimetable():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from course")
+        res1=db.select("select * from semester")
+
+        return  render_template('hod/viewtimetable.html',data=res,data1=res1)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/hodviewtimetablepost',methods=['POST','get'])
+def hodviewtimetablepost():
+    session['lg'] = 'ln'
+    if session['lg'] == 'ln':
+        
+        dept = request.form['select1']
+        sem = request.form['sem']
+        session["dept"]=dept
+        session["sem"]=sem
+        db=Db()
+        m=0
+        t=0
+        w=0
+        th=0
+        f=0
+        # s=0
+        mon1=[]
+        tue1=[]
+        wed1=[]
+        thur1=[]
+        fri1=[]
+        # sat1=[]
+        res=db.select("select * from course")
+        jq=jackal_copy()
+        mon = jq.getlogmondaystaff(sem, dept)
+        for i in mon:
+            # print(i)
+            m+=1
+            if m==7:
+                break;
+            else:
+                mon1.append(i)
+        # print (thur1)
+        tue = jq.getlogtuesdaystaff(sem, dept)
+        for i1 in tue:
+            t+=1
+            if t==7:
+                break;
+            else:
+                tue1.append(i1)
+        wed = jq.getlogweddaystaff(sem, dept)
+        for i2 in wed:
+            w+=1
+            if w==7:
+                break;
+            else:
+                wed1.append(i2)
+        thur = jq.getlogthurdaystaff(sem, dept)
+        for i3 in thur:
+            th+=1
+            if th==7:
+                break;
+            else:
+                thur1.append(i3)
+        fri = jq.getlogfridaystaff(sem, dept)
+        for i4 in fri:
+            f+=1
+            if f==7:
+                break;
+            else:
+                fri1.append(i4)
+        # sat = jq.getlogsatdaystaff(sem, dept)
+        # for i5 in sat:
+        #     s+=1
+        #     if s==7:
+        #         break;
+        #     else:
+        #         sat1.append(i5)
+        return  render_template('hod/viewtimetable.html',data=res,mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sem=sem)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/api_hodviewtimetable',methods=['get','post'])
+def api_hodviewtimetable():
+    db=Db()
+    res=db.select("select * from course")
+    res1=db.select("select * from semester")
+
+    return  render_template('hod/viewtimetable.html',data=res,data1=res1)
+
+
+
+@app.route('/api_androidviewtimetable',methods=['get','post'])
+def api_androidviewtimetable():
+    db=Db()
+    res=db.select("select * from course")
+    res1=db.select("select * from semester")
+
+    return  render_template('api_androidviewtimetable.html',data=res,data1=res1)
+
+
+
+@app.route('/api_androidviewtimetablepost',methods=['POST','get'])
+def api_androidviewtimetablepost():
+    session['lg'] = 'ln'
+    if session['lg'] == 'ln':
+        
+        dept = request.form['select1']
+        sem = request.form['sem']
+        session["dept"]=dept
+        session["sem"]=sem
+        db=Db()
+        m=0
+        t=0
+        w=0
+        th=0
+        f=0
+        # s=0
+        mon1=[]
+        tue1=[]
+        wed1=[]
+        thur1=[]
+        fri1=[]
+        # sat1=[]
+        res=db.select("select * from course")
+        jq=jackal_copy()
+        mon = jq.getlogmondaystaff(sem, dept)
+        for i in mon:
+            # print(i)
+            m+=1
+            if m==7:
+                break;
+            else:
+                mon1.append(i)
+        # print (thur1)
+        tue = jq.getlogtuesdaystaff(sem, dept)
+        for i1 in tue:
+            t+=1
+            if t==7:
+                break;
+            else:
+                tue1.append(i1)
+        wed = jq.getlogweddaystaff(sem, dept)
+        for i2 in wed:
+            w+=1
+            if w==7:
+                break;
+            else:
+                wed1.append(i2)
+        thur = jq.getlogthurdaystaff(sem, dept)
+        for i3 in thur:
+            th+=1
+            if th==7:
+                break;
+            else:
+                thur1.append(i3)
+        fri = jq.getlogfridaystaff(sem, dept)
+        for i4 in fri:
+            f+=1
+            if f==7:
+                break;
+            else:
+                fri1.append(i4)
+        # sat = jq.getlogsatdaystaff(sem, dept)
+        # for i5 in sat:
+        #     s+=1
+        #     if s==7:
+        #         break;
+        #     else:
+        #         sat1.append(i5)
+        return  render_template('api_androidviewtimetablepost.html',data=res,mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sem=sem)
+    else:
+        return render_template('login_index.html')
+
+
+
+
+
+
+
+
+@app.route('/admin_view_tt')
+def admin_view_tt():
+    db=Db()
+    res=db.select("select * from timetable,subject where timetable.subject_id=subject.subject_id")
+    return render_template('admin/view_tt.html',data=res)
+
+
+
+
+# ///////////////////////////////////////////////////HOD/////////////////////////////////////////////////////////////
+
+
+@app.route('/view_profile')
+def view_profile():
+        data={}
+    
+        qry="SELECT * FROM hod INNER JOIN staff ON hod.staff_id = staff.staff_id WHERE staff.staff_id = '%s'"%(session['staff_id'])
+        data['view']=select(qry)
+        
+        return render_template('hod/view_profile.html',data=data)
+    
+
+
+
+
+@app.route('/addsubject')
+def addsubject():
+    if session['log'] == 'lo':
+
+        db = Db()
+        # qr1 = "select * from course,hod,department where course.department_id=department.department_id and hod.dept_id=department.department_id and hod.hod_id='"+str(session['lid'])+"'"
+        qry1 = "select * from course "
+        res = db.select(qry1)
+        qry2 = "select * from semester"
+        res1 = db.select(qry2)
+        # # print(res)
+        return render_template('admin/sub reg.html', data=res,data1=res1)
+    else:
+        return render_template('login_index.html')
+
+# @app.route('/addsub',methods=['get','post'])
+# def addsub():
+#     if session['log'] == 'lo':
+#         db=Db()
+#         n=request.form['textfield']
+#         course=request.form['course']
+#         semester=request.form['sem']
+#         t=request.form['t']
+#         # print(n,course,"l",semester)
+#         # qry11 = "select * from subject where subject_name='"+n+"' and course_id='"+course+"' and semester='"+semester+"'"
+#         qry11 = "select * from  subject where subject_name='%s' and course_id='%s' and semester_id='%s'"%(n,course,semester)
+#         qry1=db.selectOne(qry11)
+#         # print(qry1,"kkkkkkkkkkkkkkkk")
+#         if qry1 is None:
+
+#             res  = db.insert("insert into subject values(null,'%s','%s','%s')"%(n,course,semester))
+#             # print("//////////////////////////////",res)
+            
+            
+#             db.insert("insert into subject_details values(null,'%s','%s','30','%s')"%(res,t,semester))
+            
+#             return '''<script>alert("successfull");window.location='/ADMINHOME'</script>'''
+#         else:
+#             return '''<script>alert("already subject is added in this course");window.location='/ADMINHOME'</script>'''
+#     else:
+#         return render_template('login_index.html')
+
+
+@app.route('/addsub', methods=['get', 'post'])
+def addsub():
+    if session['log'] == 'lo':
+        db = Db()
+        n = request.form['textfield']
+        course = request.form['course']
+        semester = request.form['sem']
+        t = request.form['t']
+        lect_hr=request.form['lecture_hour']
+        # print(n, course, "l", semester)
+
+        # Check if the subject already exists for the given course and semester
+        qry_subject = "select * from subject where subject_name='%s' and course_id='%s' and semester_id='%s'" % (n, course, semester)
+        existing_subject = db.selectOne(qry_subject)
+
+        if existing_subject is None:
+            # Insert subject into the subject table
+            res = db.insert("insert into subject values(null, '%s', '%s', '%s')" % (n, course, semester))
+            # print("//////////////////////////////", res)
+
+            # Check if subject details already exist for the given course and semester
+            qry_subject_details = "select * from subject_details where subject_id='%s' and type='%s' and semester='%s'" % (res, t, semester)
+            existing_subject_details = db.selectOne(qry_subject_details)
+
+            if existing_subject_details is None:
+                # Insert subject details into the subject_details table
+                db.insert("insert into subject_details values(null, '%s', '%s', '%s', '%s')" % (res, t,lect_hr, semester))
+
+                return '''<script>alert("Successfully added subject and subject details");window.location='/ADMINHOME'</script>'''
+            else:
+                return '''<script>alert("Subject already exists, but subject details already added in this course");window.location='/ADMINHOME'</script>'''
+        else:
+            return '''<script>alert("Subject already exists in this course");window.location='/ADMINHOME'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/viewsubject')
+def viewsubject():
+    if session['log'] == 'lo':
+        db = Db()
+        # qry = "select * from subject,course,department,hod where subject.course_id=course.course_id and course.department_id=department.department_id and hod.dept_id=department.department_id and hod.hod_id='"+str(session['lid'])+"'"
+        q="SELECT * FROM SUBJECT  inner join subject_details using(subject_id) inner join course using(course_id)"
+        res = db.select(q)
+ 
+        return render_template('admin/sub view.html', val=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/searchviewsubject',methods=['post'])
+def searchviewsubject():
+    if session['log'] == 'lo':
+        db = Db()
+        q = "SELECT `course`.*,`hod`.`name` FROM `course` JOIN `hod` ON `hod`.`dept_id`=`course`.`department_id`"
+        res1 = db.select(q)
+        cid=request.form['select']
+        sem=request.form['select2']
+        qry="SELECT * FROM `subject`,`subject_details` WHERE `subject`.`subject_id`=`subject_details`.`sid` and `course_id`='"+cid+"' AND `semester`='"+sem+"' AND `hod_id`='"+str(session['lid'])+"'"
+        res=db.select(qry)
+        return render_template('hod/sub view.html', data=res,val=res1)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/deletesubject/<a>')
+def deletesubject(a):
+    if session['log'] == 'lo':
+        db=Db()
+        qry = "delete from subject where subject_id='" + a + "'"
+        db.delete(qry)
+        qr="delete from login where login_id='"+a+"'"
+        db.delete(qr)
+        return '''<script>alert("deleted successfully");window.location='/viewsubject'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/editsubject/<a>')
+def editsubject(a):
+    if session['log'] == 'lo':
+        db=Db()
+        qr = "select * from subject,course,subject_details where subject.course_id=course.course_id and `subject`.`subject_id`=`subject_details`.`subject_id` and subject.subject_id='"+str(a)+"'"
+        res=db.selectOne(qr)
+        q=db.select("select * from course,hod,department where course.department_id=department.department_id and hod.dept_id=department.department_id and hod.hod_id='"+str(session['lid'])+"'")
+        return render_template('admin/sub update.html',data=res,d=q)
+    else:
+        return render_template('login_index.html')
+@app.route('/editsubject1/<a>',methods=['post'])
+def editsubject1(a):
+    if session['log'] == 'lo':
+        db=Db()
+        n = request.form['textfield']
+        course = request.form['course']
+        semester = request.form['select']
+        t = request.form['t']
+        wh = request.form['hw']
+        qry = "update subject set subject_name='" + n + "',course_id='" + course + "',semester='" + semester + "' where subject_id='"+a+"'"
+        db.update(qry)
+        db.update("UPDATE `subject_details` SET `type`='"+t+"',`lh`='"+str(wh)+"' WHERE `sid`='"+a+"'")
+        return '''<script>alert("updated successfully");window.location='/viewsubject'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/editsubjecttsr',methods=['get','post'])
+def editsubjecttsr():
+    sub_id=request.args['id']
+    data={}
+    
+    crs='select * from course'
+    data['cs']=crs
+    
+    qry1 = "select * from course "
+    res = select(qry1)
+    qry2 = "select * from semester"
+    res1 =select(qry2)
+   
+    
+    ff="SELECT * FROM SUBJECT INNER JOIN subject_details USING(subject_id) WHERE subject_id='%s'"%(sub_id)
+    data['view']=select(ff)
+    
+    
+    if 'update' in request.form:
+        subname=request.form['subname']
+        print(subname,'#################################')
+        course=request.form['course']
+        sem=request.form['sem']
+        type=request.form['type']
+        lecture_hour=request.form['lecture_hour']
+        
+        
+        ip="update  subject set  subject_name='%s',course_id='%s',semester_id='%s' where subject_id='%s'"%(subname,course,sem,sub_id)
+        dd=update(ip)
+        
+        
+        
+        ips="update   subject_details set subject_id='%s',type='%s',lh='%s',semester='%s' where subject_id='%s' "%(dd,type,lecture_hour,sem,sub_id)
+        update(ips)
+        
+        return '''<script>alert('updated');window.location='viewsubject'</script>'''
+        
+        
+    
+    return render_template('admin/editsubjecttsr.html',data=data, data1=res,data2=res1)
+
+
+
+
+
+
+
+
+
+@app.route('/add_staff',methods=['get','post'])
+def add_staff():
+    
+    if request.method=="POST":
+        name=request.form['textfield']
+        place=request.form['textfield2']
+        district=request.form['select']
+        quali=request.form['textfield3']
+        image=request.files['fileField']
+        date=datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+        image.save("static\images\\"+date+'.jpg')
+        ss="/static/images/"+date+'.jpg'
+        ph=request.form['textfield8']
+        e=request.form['textfield7']
+        password=request.form['textfield9']
+        db=Db()
+        # res=db.insert("insert into login (username,password) VALUES ('"+e+"','"+password+"','staff')")
+        res=db.insert("insert into login values(null,'%s','%s','pending')"%(e,password))
+        
+        # db.insert("insert into staff (login_id,staff_name) VALUES ('"+str(res)+"','"+name+"','"+place+"','"+district+"','"+quali+"','"+str(ss)+"','"+e+"','"+ph+"')")
+        db.insert("insert into staff values(null,'%s','%s','%s','%s','%s','%s','%s','%s','pending')"%(res,name,place,district,quali,ss,e,ph))
+        return '''<script>alert("ADDED SUCCESSFULLY");window.location="/log"</script>'''
+    
+    return render_template('staff_reg.html')
+   
+
+
+
+@app.route('/view_staff')
+def view_staff():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from staff where staff.hod_id='"+str(session['lid'])+"'")
+        return render_template('hod/view_staff.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/update_staff/<s>',methods=['get','post'])
+def update_staff(s):
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            name = request.form['textfield']
+            place = request.form['textfield2']
+            district = request.form['select']
+            quali = request.form['textfield3']
+            image = request.files['fileField']
+            date=datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+            image.save(r"D:\project\TIME TABLE\static\images\\"+date+'.jpg')
+            ss="/static/images/"+date+'.jpg'
+            ph = request.form['textfield8']
+            e = request.form['textfield7']
+            db=Db()
+            if request.files!="":
+                if image.filename!="":
+                    db.update("update staff set staff_name='"+name+"',place='"+place+"',district='"+district+"',qualification='"+quali+"',image='"+str(ss)+"',email='"+e+"',phone='"+ph+"' where staff_id='"+s+"'")
+                    return '''<script>alert("UPDATE SUCCESSFULLY");window.location="/view_staff"</script>'''
+                else:
+                    db.update("update staff set staff_name='" + name + "',place='" + place + "',district='" + district + "',qualification='" + quali + "',email='" + e + "',phone='" + ph + "' where staff_id='" + s + "'")
+                    return '''<script>alert("UPDATE SUCCESSFULLY");window.location="/view_staff"</script>'''
+            else:
+                db.update("update staff set staff_name='" + name + "',place='" + place + "',district='" + district + "',qualification='" + quali + "',email='" + e + "',phone='" + ph + "' where staff_id='" + s + "'")
+                return '''<script>alert("UPDATE SUCCESSFULLY");window.location="/view_staff"</script>'''
+        else:
+            db=Db()
+            res=db.selectOne("select * from staff where hod_id='"+str(session['lid'])+"' and staff_id='"+str(s)+"'")
+            return render_template('hod/update_staff.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/delete_staff/<s>')
+def delete_staff(s):
+    if session['log'] == 'lo':
+        db=Db()
+        db.delete("delete from staff where staff_id='"+str(s)+"'")
+        db.delete("delete from login where staff_id='"+str(s)+"'")
+        return '''<script>alert("DELETED SUCCESSFULLY");window.location="/view_staff"</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/admin_makehod', methods=['get','post'])
+def admin_makehod():
+    
+    db=Db()
+    tid=request.args['s_id']
+    data={}
+    y="select * from staff  where staff_id='%s'"%(tid)
+    u=db.select(y)
+    data['t']=u
+    z="select * from department"
+    data['dept']=db.select(z)
+    if 'sub' in request.form:
+    
+        dept=request.form['dept']
+
+        lp="insert into hod values(null,'%s','%s')"%(tid,dept)
+        db.insert(lp)
+        
+        pl="update staff set `status`='HOD' where staff_id='%s'"%(tid)
+        db.update(pl)
+        
+        ipl="UPDATE login SET `usertype` = 'HOD' WHERE login_id = (SELECT login_id FROM staff WHERE staff_id = '%s')"%(tid)
+        db.update(ipl)
+
+        
+        return '''<script>alert('ASSIGNED');window.location='admin_view_staff'</script>'''
+        
+    return render_template("admin/admin_makehod.html",data=data)
+
+
+@app.route('/admin_maketeacher', methods=['get','post'])
+def admin_maketeacher():
+    
+    db=Db()
+    tid=request.args['s_id']
+    data={}
+    y="select * from staff  where staff_id='%s'"%(tid)
+    u=db.select(y)
+    data['t']=u
+    z="select * from department"
+    data['dept']=db.select(z)
+    
+
+       
+        
+    pl="update staff set `status`='accepted' where staff_id='%s'"%(tid)
+    db.update(pl)
+    
+    ipl="UPDATE login SET `usertype` = 'teacher' WHERE login_id = (SELECT login_id FROM staff WHERE staff_id = '%s')"%(tid)
+    db.update(ipl)
+
+        
+    return '''<script>alert('ASSIGNED');window.location='admin_view_staff'</script>'''
+      
+    # return '''<script>window.location='admin_view_staff'</script>'''
+
+
+@app.route('/allocate_sub/<s>',methods=['get','post'])
+def allocate_sub(s):
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            sub=request.form['select']
+            db=Db()
+            db.insert("insert into sub_allocate VALUES ('','"+sub+"','"+str(s)+"')")
+            return '''<script>alert("ALLOCATED SUCCESSFULLY");window.location="/view_staff"</script>'''
+        else:
+            db=Db()
+            res=db.select("select * from subject,course,department where subject.hod_id='"+str(session['lid'])+"' and subject.course_id=course.course_id and course.department_id=department.department_id")
+            return render_template('hod/allocate_sub.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/view_allocated_sub')
+def view_allocated_sub():
+    if session['log'] == 'lo':
+        db=Db()
+
+        re = db.select("SELECT * FROM `course`")
+
+        res=db.select("select * from sub_allocate,subject,staff where sub_allocate.sub_id=subject.subject_id and sub_allocate.staff_id=staff.staff_id and staff.hod_id='"+str(session['lid'])+"'")
+        return render_template('hod/view_allocate.html',data=res,data1 = re)
+    else:
+        return render_template('login_index.html')
+
+
+
+
+
+@app.route('/search_alloc',methods=['post'])
+def search_alloc():
+    c = request.form['c']
+    s = request.form['s']
+    db = Db()
+    re = db.select("SELECT * FROM `course`")
+    res = db.select(
+        "select * from sub_allocate,subject,staff where sub_allocate.sub_id=subject.subject_id and sub_allocate.staff_id=staff.staff_id and staff.hod_id='" + str(
+            session['lid']) + "' and `subject`.`course_id` ='"+c+"'  AND `subject`.`semester`='"+s+"'")
+    return render_template('hod/view_allocate.html', data=res, data1=re)
+
+
+
+@app.route('/delete_allocate/<a>')
+def delete_allocate(a):
+    if session['log'] == 'lo':
+        db=Db()
+        db.delete("delete from sub_allocate where allocate_id='"+a+"'")
+        return '''<script>alert("DELETED SUCCESSFULLY");window.location="/view_allocated_sub"</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+
+@app.route('/ADMINHOME6', methods=['post'])
+def hello_world6():
+    if session['log'] == 'lo':
+        db = Db()
+        n = request.form['textfield']
+        # dpt=request.form['select4']
+        course = request.form['select5']
+        # sem = request.form['sem']
+        DOB = request.form['textfield2']
+        Gender = request.form['radio']
+        # Qualification = request.form['textfield3']
+        Place = request.form['textfield4']
+        Post = request.form['textfield5']
+        Pincode = request.form['textfield6']
+        District = request.form['select']
+        Emailid = request.form['textfield7']
+        phoneno = request.form['textfield8']
+        Photo = request.files['fileField']
+        password = request.form['textfield9']
+        # try:
+        #     gmail = smtplib.SMTP('smtp.gmail.com', 587)
+        #
+        #     gmail.ehlo()
+        #
+        #     gmail.starttls()
+        #
+        #     gmail.login('aparnadazzryyan@gmail.com', 'Dazzryyan2830*')  # mail that send password
+        #
+        # except Exception as e:
+        #     # print("Couldn't setup email!!" + str(e))
+        #
+        # msg = MIMEText("Your OTP is " + str(password))  # content
+        #
+        # msg['Subject'] = 'Verification'
+        #
+        # msg['To'] = Emailid
+        #
+        # msg['From'] = 'aparnadazzryyan@gmail.com'
+        #
+        # try:
+        #
+        #     gmail.send_message(msg)
+        #
+        # except Exception as e:
+        #
+        #     # print("COULDN'T SEND EMAIL", str(e))
+        import datetime
+        date = datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+        Photo.save(r"D:\project\TIME TABLE\static\images\\" + date + ".jpg")
+        path = "/static/images/" + date + ".jpg"
+        qry = "insert into login VALUES ('','" + Emailid + "','" + str(password) + "','student')"
+        res = db.insert(qry)
+        qry = "insert into student VALUES ('" + str(res) + "','" +n+ "','"+course+"','" +DOB+ "','"+Gender+"','" + Place + "','" + Post + "','" + Pincode + "','" + District + "','"+Emailid+"','"+phoneno+"', '"+str(path)+"','"+str(session['lid'])+"')"
+        res = db.insert(qry)
+        return '''<script>alert("successfull");window.location='/hod_home'</script>'''
+    else:
+        return render_template('login_index.html')
+@app.route('/addstudent')
+def addstudent():
+    if session['log'] == 'lo':
+        db=Db()
+        qry="select * from department"
+        res=db.select(qry)
+        qr="select * from course,hod,department where course.department_id=department.department_id and hod.dept_id=department.department_id and hod.hod_id='"+str(session['lid'])+"'"
+        result=db.select(qr)
+        return render_template('hod/student reg.html',data=res,d=result)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/admin_viewstudent',methods=['get','post'])
+def viewstudent1():
+    datad={}
+    
+       
+    if session['log'] == 'lo':
+        db = Db()
+        qr = "SELECT * FROM student, course WHERE student.course_id=course.course_id"
+        res = db.select(qr)
+        if 'submit' in request.form:
+            search=request.form['cour']+'%'
+            s="SELECT * FROM student inner join course on student.course_id=course.course_id where course_name like '%s' group by student_id "%(search)
+            result=select(s)
+            print("___________",result)
+            datad['search']=select(s)
+            if not result:
+                return '''<script>alert("No search results");window.location='/admin_viewstudent';</script>'''
+            else:
+                   
+                return render_template('admin/student_search_rslt.html',datad=datad,data=res)
+        return render_template('admin/student view.html',data=res)
+    else:
+        return render_template('login_index.html')
+    
+@app.route('/hod_viewstudent')
+def hod_viewstudent():
+    if session['log'] == 'lo':
+        db = Db()
+        qr = "SELECT * FROM student, course WHERE student.course_id=course.course_id"
+        res = db.select(qr)
+        return render_template('hod/student view.html',data=res)
+    else:
+        return render_template('login_index.html')
+@app.route('/admin_view_s_attendance')
+def admin_view_s_attendance():
+    if session['log'] == 'lo':
+        db = Db()
+        id=request.args['id']
+        # qr = "select * from student,login,course where `student`.`course_id`=`course`.`course_id` and  login.login_id=student.student_id and student.hod_id='"+str(session['lid'])+"'"
+        qr = "SELECT * FROM student inner join attendance using(student_id) where student_id='%s'"%(id)
+        res = db.select(qr)
+        return render_template('admin/admin_view_s_attendance.html',data=res)
+    else:
+        return render_template('login_index.html')
+    
+@app.route('/admin_view_cemark')
+def admin_view_cemark():
+    if session['log'] == 'lo':
+        db = Db()
+        # qr = "select * from student,login,course where `student`.`course_id`=`course`.`course_id` and  login.login_id=student.student_id and student.hod_id='"+str(session['lid'])+"'"
+        qr="SELECT * FROM marks INNER JOIN staff USING(staff_id) INNER JOIN student USING(student_id) INNER JOIN course USING(course_id) INNER JOIN SUBJECT USING(course_id) group by mark_id "
+        res = db.select(qr)
+        return render_template('admin/admin_view_cemark.html',data=res)
+    else:
+        return render_template('login_index.html')
+    
+    
+
+@app.route('/admin_viewcomplaints',methods=['get','post'])
+def admin_viewcomplaints():
+    db=Db()
+    com={}
+    c="SELECT * FROM complaints INNER JOIN student USING(student_id)"
+    co=db.select(c)
+
+    com['view']=co
+   
+    return render_template("admin/admin_complaint_view.html",com=com)
+
+
+@app.route('/admin_reply',methods=['get','post'])
+    
+def admin_reply():
+    db=Db()
+    id=request.args['id']
+    if "submit" in request.form:
+        rply=request.form['reply']
+        i="UPDATE complaints SET reply='%s' WHERE complaint_id='%s'"%(rply,id)
+        db.update(i)
+        return '''<script>alert(' Complaint Sent ');window.location='admin_viewcomplaints'</script>'''
+    return render_template("admin/admin_reply.html")
+
+
+    
+@app.route('/viewstudent')
+def viewstudent():
+    if session['log'] == 'lo':
+        
+        return render_template('hod/student view.html')
+    else:
+        return render_template('login_index.html')
+@app.route('/ds/<a>')
+def deletestudent1(a):
+    if session['log'] == 'lo':
+        db=Db()
+        qry = "delete from student where student_id='" + a + "'"
+        db.delete(qry)
+        qr="delete from login where login_id='"+a+"'"
+        db.delete(qr)
+        return '''<script>alert("deleted successfully");window.location='/viewstudent'</script>'''
+    else:
+        return render_template('login_index.html')
+@app.route('/editstudent1/<a>')
+def editstudent1(a):
+    if session['log'] == 'lo':
+        db=Db()
+        qr = "select * from student where student_id='"+a+"'"
+        res=db.selectOne(qr)
+        qr=db.select("select * from course,hod,department where course.department_id=department.department_id and hod.dept_id=department.department_id and hod.hod_id='"+str(session['lid'])+"'")
+        # q=db.select("select * from department")
+        return render_template('hod/student update.html',data=res,d=qr)
+    else:
+        return render_template('login_index.html')
+@app.route('/ADMINHOME6/<a>', methods=['post'])
+def ADMINHOME6(a):
+    if session['log'] == 'lo':
+        db = Db()
+        n = request.form['textfield']
+        # dpt = request.form['select4']
+        # sem = request.form['sem']
+        cid = request.form['select5']
+        DOB = request.form['textfield2']
+        Gender = request.form['radio']
+        # Qualification = request.form['textfield3']
+        Place = request.form['textfield4']
+        Post = request.form['textfield5']
+        Pincode = request.form['textfield6']
+        District = request.form['select']
+        Emailid = request.form['textfield7']
+        phoneno = request.form['textfield8']
+        Photo = request.files['fileField']
+        if request.files is not None:
+            if Photo.filename!="":
+                import datetime
+                date = datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+                Photo.save(r"D:\project\TIME TABLE\static\images\\" + date + ".jpg")
+                path = "/static/images/" + date + ".jpg"
+                qry = db.update("update student set student_name='"+n+"',course_id='"+cid+"',dob='"+DOB+"',gender='"+Gender+"',place='"+Place+"',post='"+Post+"',pincode='"+Pincode+"',district='"+District+"',email_id='"+Emailid+"',phone_number='"+phoneno+"',photo='"+str(path)+"' where student_id='"+a+"'")
+
+                return '''<script>alert("updated successfull");window.location='/viewstudent'</script>'''
+
+            else:
+                qry = db.update("update student set student_name='"+n+"',course_id='"+cid+"',dob='"+DOB+"',gender='"+Gender+"',place='"+Place+"',post='"+Post+"',pincode='"+Pincode+"',district='"+District+"',email_id='"+Emailid+"',phone_number='"+phoneno+"' where student_id='"+a+"'")
+
+
+                return '''<script>alert("updated successfull");window.location='/viewstudent'</script>'''
+        else:
+            qry = db.update("update student set student_name='"+n+"',course_id='"+cid+"',dob='"+DOB+"',gender='"+Gender+"',place='"+Place+"',post='"+Post+"',pincode='"+Pincode+"',district='"+District+"',email_id='"+Emailid+"',phone_number='"+phoneno+"' where student_id='"+a+"'")
+
+
+            return '''<script>alert("updated successfull");window.location='/viewstudent'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/hod_view_tt')
+def hod_view_tt():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from timetable,subject,department,course,hod where timetable.subject_id=subject.subject_id and subject.course_id=course.course_id and course.department_id=department.department_id and hod.dept_id=department.department_id and hod.hod_id='"+str(session['lid'])+"'")
+        return render_template('hod/view_timetable.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/hod_viewtt')
+def hod_viewtt():
+    if session['lg'] == 'ln':
+        #     db=Db()
+        #     qry=db.select("select * from timetable,subject,faculty,sub_alloc where timetable.subject_id=subject.subject_id and faculty.faculty_id=sub_alloc.faculty_id and sub_alloc.subject_id=subject.subject_id and sub_alloc.faculty_id='"+str(session['lid'])+"'")
+        #     return render_template('faculty/timetable view.html',data=qry)
+        db = Db()
+        res = db.select("select * from course,hod where  course.department_id=hod.dept_id and hod.hod_id='" + str(session['lid']) + "'")
+        # print(len(res))
+        return render_template('hod/hod_viewtimetable.html', data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/adminviewtimetablepost111', methods=['get','POST'])
+def adminviewtimetablepost111():
+    if session['lg'] == 'ln':
+        dept = request.form['select1']
+        sem = request.form['select']
+        session["dept"] = dept
+        session["sem"] = sem
+        db = Db()
+        # res=db.select("select * from course")
+
+        res = db.select(
+            "select * from course,hod where  course.department_id=hod.dept_id and  hod.hod_id='" + str(session['lid']) + "'")
+        jq = jackal_copy()
+
+        res=db.select("SELECT * FROM `timetable` WHERE `subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='"+str(dept)+"' AND semester='"+str(sem)+"')")
+        if len(res)==30:
+            qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Monday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+                dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+            mon1 = db.select(qry)
+            qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Tuesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+                dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+            tue1 = db.select(qry)
+
+            qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Wednesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+                dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+            wed1 = db.select(qry)
+            qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Thursday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+                dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+            thur1 = db.select(qry)
+            qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Friday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+                dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+            fri1 = db.select(qry)
+
+            return render_template('hod/viewtimetable.html', mon=mon1, tue=tue1, wed=wed1, thur=thur1, fri=fri1,sem=sem)
+        res=db.selectOne("SELECT SUM(`lh`) AS sid FROM `subject_details` WHERE `subject_id`IN(SELECT `subject_id` FROM `subject` WHERE course_id='"+str(dept)+"' AND semester='"+str(sem)+"')")
+        count=0
+        try:
+            count=int(res['sid'])
+        except:
+            pass
+        if count!=30:
+            return '''<script>alert(" Insufficient Data ");window.location='/hod_viewtt'</script>'''
+
+
+        ressub=db.select("SELECT *  FROM `subject_details` WHERE `sid`IN(SELECT `subject_id` FROM `subject` WHERE course_id='"+str(dept)+"' AND semester='"+str(sem)+"') order by lh desc")
+        # print(ressub)
+
+        m = 0
+        t = 0
+        w = 0
+        th = 0
+        f = 0
+        sublis=[]
+        hlist=[]
+        typelist=[]
+        for i in ressub:
+            sublis.append(i['sid'])
+            hlist.append(i['lh'])
+            typelist.append(i['type'])
+        print ("###################################")
+        print (sublis)
+        print (hlist)
+        # print("***********************************")
+        # print("***********************************")
+        # print("***********************************")
+        # print("***********************************")
+        result=[]
+        resultlist=[]
+
+        for i in range(0,5):
+            lis = []
+
+            for j in range(0,6):
+                if len(lis)==6:
+                    break
+                while True:
+                    if len(lis) == 6:
+                        break
+                    ii = random.randint(0, len(hlist)-1)
+                    # print(resultlist.count(sublis[ii]),"===============",sublis[ii])
+                    if resultlist.count(sublis[ii])==hlist[ii]:
+                        sublis.pop(ii)
+                        hlist.pop(ii)
+                        typelist.pop(ii)
+
+                    elif typelist[ii]=="Lab" and sublis[ii] in resultlist:
+                        pass
+                    elif sublis[ii] not in lis:
+                        if typelist[ii]=="Lab":
+                            lis.append(sublis[ii])
+                            resultlist.append(sublis[ii])
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        break
+
+                    else:
+                        count = lis.count(ii)
+                        if hlist[ii]//5>count:
+                            if hlist[ii]//5<3:
+                                if lis[-1]!=ii:
+                                    lis.append(sublis[ii])
+                                    resultlist.append(sublis[ii])
+                                    break
+                            else:
+                                lis.append(sublis[ii])
+                                resultlist.append(sublis[ii])
+                                break
+            result.append(lis)
+
+            # for jj in lis:
+            #     resultlist.append(jj)
+        print ("=========================================       b   ")
+        print (resultlist)
+        print (result)
+
+
+
+        mon1 = result[0]
+        tue1 = result[1]
+        wed1 = result[2]
+        thur1 =result[3]
+        fri1 = result[4]
+
+        for i in range(0,6):
+            qry="INSERT INTO `timetable` VALUES(NULL,'"+str(mon1[i])+"','Monday','"+str(i+1)+"')"
+            val=(mon1[i],"Monday",i+1)
+            db.insert(qry)
+        for i in range(0,6):
+            qry="INSERT INTO `timetable` VALUES(NULL,'"+str(tue1[i])+"','Tuesday','"+str(i+1)+"')"
+            val=(tue1[i],"Tuesday",i+1)
+            db.insert(qry)
+        for i in range(0,6):
+            qry="INSERT INTO `timetable` VALUES(NULL,'"+str(wed1[i])+"','Wednesday','"+str(i+1)+"')"
+            val=(wed1[i],"Wednesday",i+1)
+            db.insert(qry)
+        for i in range(0,6):
+            qry="INSERT INTO `timetable` VALUES(NULL,'"+str(thur1[i])+"','Thursday','"+str(i+1)+"')"
+            val=(thur1[i],"Thursday",i+1)
+            db.insert(qry)
+        for i in range(0,6):
+            qry="INSERT INTO `timetable` VALUES(NULL,'"+str(fri1[i])+"','Friday','"+str(i+1)+"')"
+            val=(fri1[i],"Friday",i+1)
+            db.insert(qry)
+
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Monday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+        mon1 = db.select(qry)
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Tuesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+        tue1 = db.select(qry)
+
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Wednesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+        wed1 = db.select(qry)
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Thursday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+        thur1 = db.select(qry)
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Friday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester='" + str(sem) + "') ORDER BY `time_table_id`"
+        fri1 = db.select(qry)
+
+        return render_template('hod/viewtimetable.html', mon=mon1, tue=tue1, wed=wed1, thur=thur1, fri=fri1,
+                               sem=sem)
+        # return render_template('hod/hod_viewtimetable.html', data=res, mon=mon1, tue=tue1, wed=wed1, thur=thur1,fri=fri1, sat=sat1, sem=sem)
+    else:
+        return render_template('login_index.html')
+
+# @app.route('/adminviewtimetablepost111', methods=['POST'])
+# def adminviewtimetablepost111():
+#     if session['lg'] == 'ln':
+#         dept = request.form['select1']
+#         sem = request.form['select']
+#         session["dept"] = dept
+#         session["sem"] = sem
+#         db = Db()
+#         # res=db.select("select * from course")
+#         res = db.select(
+#             "select * from course,hod where  course.department_id=hod.dept_id and  hod.hod_id='" + str(
+#                 session['lid']) + "'")
+#         jq = jackal_copy()
+#         # mon = jq.getlogmondaystaff(sem, dept)
+#         # tue = jq.getlogtuesdaystaff(sem, dept)
+#         # wed = jq.getlogweddaystaff(sem, dept)
+#         # thur = jq.getlogthurdaystaff(sem, dept)
+#         # fri = jq.getlogfridaystaff(sem, dept)
+#         # sat = jq.getlogsatdaystaff(sem, dept)
+#         m = 0
+#         t = 0
+#         w = 0
+#         th = 0
+#         f = 0
+#
+#         mon1 = []
+#         tue1 = []
+#         wed1 = []
+#         thur1 = []
+#         fri1 = []
+#
+#         mon = jq.getlogmondaystaff(sem, dept)
+#         for i in mon:
+#             # print(i)
+#             m += 1
+#             if m == 7:
+#                 break;
+#             else:
+#                 mon1.append(i)
+#         # print (thur1)
+#         tue = jq.getlogtuesdaystaff(sem, dept)
+#         for i1 in tue:
+#             t += 1
+#             if t == 7:
+#                 break;
+#             else:
+#                 tue1.append(i1)
+#         wed = jq.getlogweddaystaff(sem, dept)
+#         for i2 in wed:
+#             w += 1
+#             if w == 7:
+#                 break;
+#             else:
+#                 wed1.append(i2)
+#         thur = jq.getlogthurdaystaff(sem, dept)
+#         for i3 in thur:
+#             th += 1
+#             if th == 7:
+#                 break;
+#             else:
+#                 thur1.append(i3)
+#         fri = jq.getlogfridaystaff(sem, dept)
+#         for i4 in fri:
+#             f += 1
+#             if f == 7:
+#                 break;
+#             else:
+#                 fri1.append(i4)
+#         # sat = jq.getlogsatdaystaff(sem, dept)
+#         # for i5 in sat:
+#         #     s += 1
+#         #     if s == 7:
+#         #         break;
+#         #     else:
+#         #         sat1.append(i5)
+#         return render_template('hod/hod_viewtimetable.html', data=res, mon=mon1, tue=tue1, wed=wed1, thur=thur1,
+#                                fri=fri1, sem=sem)
+#         # return render_template('hod/hod_viewtimetable.html', data=res, mon=mon1, tue=tue1, wed=wed1, thur=thur1,fri=fri1, sat=sat1, sem=sem)
+#     else:
+#         return render_template('login_index.html')
+
+@app.route('/hod_view_s_attendance')
+def hod_view_s_attendance():
+    if session['log'] == 'lo':
+        db = Db()
+        id=request.args['id']
+        # qr = "select * from student,login,course where `student`.`course_id`=`course`.`course_id` and  login.login_id=student.student_id and student.hod_id='"+str(session['lid'])+"'"
+        qr = "SELECT * FROM student inner join attendance using(student_id) where student_id='%s'"%(id)
+        res = db.select(qr)
+        return render_template('hod/hod_view_s_attendance.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+# /////////////////////////////////////////////////////////////STAFF////////////////////////////////////////////////////
+
+
+@app.route('/staff_home')
+def staff_home():
+    return render_template('staff/staff_home.html')
+
+
+
+@app.route('/staff_profile')
+def staff_profile():
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            name=request.form['textfield']
+            place=request.form['textfield2']
+            district=request.form['select']
+            quali=request.form['textfield3']
+            image=request.files['fileField']
+            date=datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+            image.save(r"D:\project\TIME TABLE\static\images\\"+date+'.jpg')
+            ss="/static/images/"+date+'.jpg'
+            ph=request.form['textfield8']
+            e=request.form['textfield7']
+            # password=request.form['textfield9']
+            db=Db()
+            # res=db.insert("insert into login VALUES ('','"+e+"','"+password+"','staff')")
+            # db.insert("insert into staff VALUES ('"+str(res)+"','"+str(session['lid'])+"','"+name+"','"+place+"','"+district+"','"+quali+"','"+str(ss)+"','"+e+"','"+ph+"')")
+            # return '''<script>alert("ADDED SUCCESSFULLY");window.location="hod_home"</script>'''
+        else:
+            db=Db()
+            res=db.selectOne("select * from staff where staff_id='"+str(session['lid'])+"'")
+            return render_template('staff/view_profile.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/staff_view_allocated_sub')
+def staff_view_allocated_sub():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from sub_allocate,subject where sub_allocate.sub_id=subject.subject_id and sub_allocate.staff_id='"+str(session['lid'])+"'")
+        return render_template('staff/view_allocate_sub.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/add_notes/<a>',methods=['get','post'])
+def add_notes(a):
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            notes=request.files['fileField']
+            date=datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+            notes.save(r"D:\project\TIME TABLE\static\images\\"+date+'.pdf')
+            ss="/static/images/"+date+'.pdf'
+            db=Db()
+            db.insert("insert into notes VALUES ('','"+str(a)+"','"+str(ss)+"',curdate())")
+            return '''<script>alert("ADDED SUCCESSFULLY");window.location='/staff_view_allocated_sub'</script>'''
+        else:
+            return render_template('staff/add_notes.html')
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/view_notes')
+def view_notes():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from notes,sub_allocate,subject WHERE notes.allocation_id=sub_allocate.allocate_id and sub_allocate. staff_id='"+str(session['lid'])+"' and sub_allocate.sub_id=subject.subject_id")
+        return render_template('staff/view_notes.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/delete_notes/<n>')
+def delete_notes(n):
+    if session['log'] == 'lo':
+        db=Db()
+        db.delete("delete from notes where note_id='"+str(n)+"'")
+        return '''<script>alert("DELETED SUCCESSFULLY");window.location='/view_notes'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/add_works/<a>',methods=['get','post'])
+def add_works(a):
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            work=request.files['fileField']
+            date = datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+            work.save(r"D:\project\TIME TABLE\static\images\\" + date + '.pdf')
+            ss = "/static/images/" + date + '.pdf'
+            db = Db()
+            db.insert("insert into `work` VALUES ('','" + str(a) + "','" + str(ss) + "',curdate())")
+            return '''<script>alert("ADDED SUCCESSFULLY");window.location='/staff_view_allocated_sub'</script>'''
+        else:
+            return render_template('staff/add_works.html')
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/view_works')
+def view_works():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from `work`,sub_allocate,subject WHERE `work`.allocation_id=sub_allocate.allocate_id and sub_allocate. staff_id='"+str(session['lid'])+"' and sub_allocate.sub_id=subject.subject_id")
+        return render_template('staff/view_works.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/delete_work/<n>')
+def delete_work(n):
+    if session['log'] == 'lo':
+        db=Db()
+        db.delete("delete from `work` where work_id='"+str(n)+"'")
+        return '''<script>alert("DELETED SUCCESSFULLY");window.location='/view_notes'</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+
+
+
+@app.route('/staff_view_tt')
+def staff_view_tt():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from timetable,subject,department,course,hod,staff where timetable.subject_id=subject.subject_id and subject.course_id=course.course_id and course.department_id=department.department_id and hod.dept_id=department.department_id and staff.hod_id=hod.hod_id and staff.staff_id='"+str(session['lid'])+"'")
+        return render_template('staff/view_timetable.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+
+
+@app.route('/clttview')
+def clttview():
+    if session['lg'] == 'ln':
+    #     db=Db()
+    #     qry=db.select("select * from timetable,subject,faculty,sub_alloc where timetable.subject_id=subject.subject_id and faculty.faculty_id=sub_alloc.faculty_id and sub_alloc.subject_id=subject.subject_id and sub_alloc.faculty_id='"+str(session['lid'])+"'")
+    #     return render_template('faculty/timetable view.html',data=qry)
+        db = Db()
+        res = db.select("select * from course,hod, staff where  course.department_id=hod.dept_id and staff.hod_id=hod.hod_id and staff.staff_id='" + str(session['lid']) + "'")
+        # print(len(res))
+        return render_template('staff/staff_viewtimetable.html', data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/adminviewtimetablepost1',methods=['GET','POST'])
+def adminviewtimetablepost1():
+    if session['lg'] == 'ln':
+        dept = ''
+        # dept = request.form['dept1']
+        sem = request.form['select']
+        session["dept"]=dept
+        session["sem"]=sem
+        db=Db()
+        # res=db.select("select * from course")
+        res = db.select("select * from course,hod, staff where  course.department_id=hod.dept_id and staff.hod_id=hod.hod_id and staff.staff_id='" + str(session['lid']) + "'")
+        jq=jackal_copy()
+        # mon = jq.getlogmondaystaff(sem, dept)
+        # tue = jq.getlogtuesdaystaff(sem, dept)
+        # wed = jq.getlogweddaystaff(sem, dept)
+        # thur = jq.getlogthurdaystaff(sem, dept)
+        # fri = jq.getlogfridaystaff(sem, dept)
+        # sat = jq.getlogsatdaystaff(sem, dept)
+        m = 0
+        t = 0
+        w = 0
+        th = 0
+        f = 0
+        s = 0
+        mon1 = []
+        tue1 = []
+        wed1 = []
+        thur1 = []
+        fri1 = []
+        # sat1 = []
+        mon = jq.getlogmondaystaff(sem, dept)
+        for i in mon:
+            # print(i)
+            m += 1
+            if m == 7:
+                break;
+            else:
+                mon1.append(i)
+        # print (thur1)
+        tue = jq.getlogtuesdaystaff(sem, dept)
+        for i1 in tue:
+            t += 1
+            if t == 7:
+                break;
+            else:
+                tue1.append(i1)
+        wed = jq.getlogweddaystaff(sem, dept)
+        for i2 in wed:
+            w += 1
+            if w == 7:
+                break;
+            else:
+                wed1.append(i2)
+        thur = jq.getlogthurdaystaff(sem, dept)
+        for i3 in thur:
+            th += 1
+            if th == 7:
+                break;
+            else:
+                thur1.append(i3)
+        fri = jq.getlogfridaystaff(sem, dept)
+        for i4 in fri:
+            f += 1
+            if f == 7:
+                break;
+            else:
+                fri1.append(i4)
+        # sat = jq.getlogsatdaystaff(sem, dept)
+        # for i5 in sat:
+        #     s += 1
+        #     if s == 7:
+        #         break;
+        #     else:
+        #         sat1.append(i5)
+        return render_template('staff/staff_viewtimetable.html', data=res,mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sem=sem)
+        # return render_template('staff/staff_viewtimetable.html', data=res,mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sat=sat1,sem=sem)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/staff_view_student')
+def staff_view_student():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select student.dob as d,student.photo as p,student.gender as g,student.place as plc,student.post as pst,student.district as dis,student.phone_number as phn, student.*,staff.*,hod.* from student,staff,hod where student.hod_id=hod.hod_id and staff.hod_id=hod.hod_id and staff.staff_id='"+str(session['lid'])+"'")
+        return render_template('staff/student view.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/view_work_report')
+def view_work_report():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from work_report,`work`,student,sub_allocate,`subject` where work_report.work_id=work.work_id and work_report.student_id=student.student_id and work.allocation_id=sub_allocate.allocate_id and sub_allocate.sub_id=subject.subject_id and sub_allocate.staff_id='"+str(session['lid'])+"'")
+        return render_template('staff/view_work_report.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+# ////////////////////////////////////////////////////////////STUDENT///////////////////////////////////////////
+
+
+
+@app.route('/student_home')
+def student_home():
+    if session['log'] == 'lo':
+        return render_template('student/student_home.html')
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/student_profile')
+def student_profile():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.selectOne("select * from student where student_id='"+str(session['lid'])+"'")
+        res1=db.select("select * from course")
+        return render_template('student/view_profile.html',data=res,data1=res1)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/view_sub_staff')
+def view_sub_staff():
+    if session['log'] == 'lo':
+        db=Db()
+        res1=db.selectOne("SELECT `course_id` FROM `student` WHERE `student_id`='"+str(session['lid'])+"'")
+        cid=res1['course_id']
+        res=db.select("select * from sub_allocate,subject,staff,student where sub_allocate.sub_id=subject.subject_id and sub_allocate.staff_id=staff.staff_id and staff.hod_id=student.hod_id and student.student_id='"+str(session['lid'])+"' AND `subject`.`course_id`='"+str(cid)+"'")
+        return render_template('student/view_staff_sub.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/student_view_note/<a>')
+def student_view_note(a):
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from notes where notes.allocation_id='"+str(a)+"' ")
+        return render_template('student/view_notes.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/student_view_work/<a>')
+def student_view_work(a):
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from `work` where work.allocation_id='"+str(a)+"' ")
+        return render_template('student/view_works.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/submit_report/<w>',methods=['get','post'])
+def submit_report(w):
+    if session['log'] == 'lo':
+        if request.method=="POST":
+            report=request.files['fileField']
+            date = datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+            report.save(r"D:\project\TIME TABLE\static\images\\" + date + '.pdf')
+            ss = "/static/images/" + date + '.pdf'
+            db=Db()
+            db.insert("insert into work_report VALUES ('','"+str(w)+"','"+str(session['lid'])+"','"+str(ss)+"',curdate())")
+            return '''<script>alert("ADDED SUCCESSFULLY");window.location="/view_sub_staff"</script>'''
+        else:
+            return render_template('student/submit_report.html')
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/student_view_report')
+def student_view_report():
+    if session['log'] == 'lo':
+        db=Db()
+        res=db.select("select * from work_report where work_report.student_id='"+str(session['lid'])+"'")
+        return render_template('student/view_report.html',data=res)
+    else:
+        return render_template('login_index.html')
+
+
+
+
+@app.route('/delete_report/<w>')
+def delete_report(w):
+    if session['log'] == 'lo':
+        db=Db()
+        db.delete("delete from work_report WHERE work_report_id='"+w+"'")
+        return '''<script>alert("DELETED SUCCESSFULLY");window.location="/student_view_report"</script>'''
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/student_view_tt')
+def student_view_tt():
+    if session['log'] == 'lo':
+        return render_template('student/view_timetable.html')
+    else:
+        return render_template('login_index.html')
+
+
+@app.route('/hod_assign_teacher', methods=['get','post'])
+def hod_assign_teacher():
+    data={}
+    qw="select * from batches"
+    data['b']=select(qw)
+    qe="select * from course"
+    data['c']=select(qe)
+    qt="select * from staff"
+    data['s']=select(qt)
+   
+    if 'sub' in request.form:
+        batch=request.form['batch']
+        course=request.form['course']
+        staff=request.form['staff']
+        
+        pp="insert into `assign_class` values(null,'%s','%s','%s')"%(batch,course,staff)
+        
+        insert(pp)
+        
+        return '''<script>alert("SUCCESSFULLY");window.location="/hod_assign_teacher"</script>'''
+
+    
+    return render_template("hod/hod_assign_teacher.html",data=data)
+
+@app.route('/hod_assign_staff_sub', methods=['get','post'])
+def hod_assign_staff_sub():
+    data={}
+    qw="select * from subject"
+    data['subject']=select(qw)
+  
+    qt="select * from staff"
+    data['s']=select(qt)
+   
+    if 'sub' in request.form:
+        sub=request.form['sub']
+        staff=request.form['staff']
+        
+        pp="insert into `assign_subject` values(null,'%s','%s')"%(staff,sub)
+        
+        insert(pp)
+        
+        return '''<script>alert("SUCCESSFULLY");window.location="/hod_assign_staff_sub"</script>'''
+
+    
+    return render_template("hod/hod_assign_staff_sub.html",data=data)
+
+
+
+@app.route('/student_viewtt')
+def student_viewtt():
+    if session['lg'] == 'ln':
+    #     db=Db()
+    #     qry=db.select("select * from timetable,subject,faculty,sub_alloc where timetable.subject_id=subject.subject_id and faculty.faculty_id=sub_alloc.faculty_id and sub_alloc.subject_id=subject.subject_id and sub_alloc.faculty_id='"+str(session['lid'])+"'")
+    #     return render_template('faculty/timetable view.html',data=qry)
+        db = Db()
+        res = db.select("select * from course,department,student where course.department_id=department.department_id and student.course_id=course.course_id and student.student_id='" + str(session['lid']) + "'")
+        # print(len(res))
+        return render_template('student/student_viewtimetable.html', data=res)
+    else:
+        return render_template('login_index.html')
+
+@app.route('/stud_viewtimetablepost1',methods=['POST'])
+def stud_viewtimetablepost1():
+    if session['lg'] == 'ln':
+        dept = request.form['select1']
+        sem = request.form['select']
+        session["dept"]=dept
+        session["sem"]=sem
+        db=Db()
+        # res=db.select("select * from course")
+        res = db.select("select * from course,hod, staff where  course.department_id=hod.dept_id and staff.hod_id=hod.hod_id and staff.staff_id='" + str(session['lid']) + "'")
+        jq=jackal_copy()
+        # mon = jq.getlogmondaystaff(sem, dept)
+        # tue = jq.getlogtuesdaystaff(sem, dept)
+        # wed = jq.getlogweddaystaff(sem, dept)
+        # thur = jq.getlogthurdaystaff(sem, dept)
+        # fri = jq.getlogfridaystaff(sem, dept)
+        # sat = jq.getlogsatdaystaff(sem, dept)
+        m = 0
+        t = 0
+        w = 0
+        th = 0
+        f = 0
+        s = 0
+        mon1 = []
+        tue1 = []
+        wed1 = []
+        thur1 = []
+        fri1 = []
+        # sat1 = []
+        mon = jq.getlogmondaystaff(sem, dept)
+        for i in mon:
+            # print(i)
+            m += 1
+            if m == 7:
+                break;
+            else:
+                mon1.append(i)
+        # print (thur1)
+        tue = jq.getlogtuesdaystaff(sem, dept)
+        for i1 in tue:
+            t += 1
+            if t == 7:
+                break;
+            else:
+                tue1.append(i1)
+        wed = jq.getlogweddaystaff(sem, dept)
+        for i2 in wed:
+            w += 1
+            if w == 7:
+                break;
+            else:
+                wed1.append(i2)
+        thur = jq.getlogthurdaystaff(sem, dept)
+        for i3 in thur:
+            th += 1
+            if th == 7:
+                break;
+            else:
+                thur1.append(i3)
+        fri = jq.getlogfridaystaff(sem, dept)
+        for i4 in fri:
+            f += 1
+            if f == 7:
+                break;
+            else:
+                fri1.append(i4)
+        # sat = jq.getlogsatdaystaff(sem, dept)
+        # for i5 in sat:
+        #     s += 1
+        #     if s == 7:
+        #         break;
+        #     else:
+        #         sat1.append(i5)
+        return render_template('student/student_viewtimetable.html', data=res,mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sem=sem)
+        # return render_template('student/student_viewtimetable.html', data=res,mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sat=sat1,sem=sem)
+    else:
+        return render_template('login_index.html')
+
+
+
+@app.route('/logout')
+def logout():
+    session.clear
+    session['log']=""
+    return render_template('login_index.html')
+
+
+
+
+
+
+#####################################################                   CHECKING
+
+# @app.route('/generatetimetable_new')
+# def generatetimetable_new():
+#     db = Db()
+#     res = db.select("select * from course order by course_name")
+#     # print("1",res)
+#     res1 ="select * from semester order by semester"
+#     res2=select(res1)
+#     # print("1",res2)
+#     return  render_template('hod/generation_timetable_new.html',data=res,data1=res2)
+
+@app.route('/generatetimetable_new')
+def generatetimetable_new():
+    db = Db()
+    res = db.select("select * from course order by course_name")
+    # print("1",res)
+    res2 = db.select("select * from semester")
+   
+    return  render_template('hod/generation_timetable_new.html',data=res,data1=res2)
+
+@app.route('/generatetimetable_newpost',methods=['post'])
+def generatetimetable_newpost():
+    db=Db()
+    print("//////////////\\\\\\\\\\\\\\\\")
+    
+    cid= request.form['select1']
+    sem=request.form['sem']
+    
+    print("CID : ",cid)
+    # print("SEM : ",sem)
+
+    dept = cid
+
+    session["dept"] = dept
+    session["sem"] = sem
+    print("sem : ",sem)
+    db = Db()
+    # res=db.select("select * from course")
+
+
+
+    res = db.select(
+        "SELECT * FROM `timetable` WHERE `subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "')")
+    print("<<<<<<<<<<<<<<< : ",res)
+    print(len(res))
+    if len(res) == 30:
+        print("0000")
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Monday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+        mon1 = db.select(qry)
+        print(mon1)
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Tuesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+        tue1 = db.select(qry)
+
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Wednesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+        wed1 = db.select(qry)
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Thursday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+        thur1 = db.select(qry)
+        qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Friday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+        fri1 = db.select(qry)
+
+        return render_template("hod/generation_timetable_new.html", mon=mon1, tue=tue1, wed=wed1, thur=thur1,
+                               fri=fri1,  sem=sem)
+    res = db.selectOne(
+        "SELECT SUM(`lh`) AS sid FROM `subject_details` WHERE `subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "')")
+    
+    print("ELECT SUM(`lh`) AS sid FROM `subject_details` WHERE `subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "')")
+    print("?????????????",res)
+    count = 0
+    try:
+        count = int(res['sid'])
+        print(count,"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+    except:
+        pass
+    if count != 30:
+        return '''<script>alert(" Insufficient Data ");window.location='/generatetimetable_new'</script>'''
+
+    ressub = db.select(
+        "SELECT *  FROM `subject_details` WHERE `subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+            dept) + "' AND semester_id='" + str(sem) + "') order by lh desc")
+    # print("ressub : ",ressub)
+    
+
+    m = 0
+    t = 0
+    w = 0
+    th = 0
+    f = 0
+    sublis = []
+    hlist = []
+    typelist = []
+    for i in ressub:
+        # print("lhhh : ",i['lh'])
+        sublis.append(i['subject_id'])
+        hlist.append(i['lh'])
+        typelist.append(i['type'])
+    print ("###################################")
+    print (sublis)
+    print (hlist)
+    # print("***********************************")
+    # print("***********************************")
+    # print("***********************************")
+    # print("***********************************")
+    result = []
+    resultlist = []
+
+    jjj=0
+    daylist=['Monday',"Tuesday", "Wednesday","Thursday","Friday"]
+    # # print("len(hlist) : ",len(hlist))
+    for i in range(0, 5):
+        print("hellooo")
+        # # print(i)
+        lis = []
+        # # print(len(lis))
+
+        for j in range(0, 6):
+            print("hiiiii")
+           
+            if len(lis) == 6:
+                break
+            while True:
+
+                ii = random.randint(0, len(hlist) - 1)
+                # print(ii)
+                print(sublis[ii],"sublis[ii]")
+                print(lis,"lis")
+                print(result)
+                if resultlist.count(sublis[ii]) == hlist[ii]:
+                    sublis.pop(ii)
+                    hlist.pop(ii)
+                    typelist.pop(ii)
+                    pass
+
+                # elif typelist[ii] == "Lab" and sublis[ii] in resultlist:
+                #     pass
+                elif typelist[ii] == "Lab" and len(lis)==5:
+                    pass
+                elif typelist[ii] == "Mini Project" and len(lis)==0:
+                    if sublis[ii] not in resultlist:
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        break
+                    else:
+                        pass
+
+                elif sublis[ii] not in lis and typelist[ii] != "Mini Project":
+                    if typelist[ii] == "Lab":
+                        rowind=len(result)
+                        qry="SELECT * FROM `timetable` WHERE `day`='"+daylist[rowind]+"' AND `hour`="+str(ii)+" AND `subject_id` IN (SELECT `subject_id` FROM `subject_details` WHERE `type`='Lab')"
+
+                        reslab=db.selectOne(qry)
+
+                        qry = "SELECT * FROM `timetable` WHERE `day`='" + daylist[rowind] + "' AND `hour`=" + str(
+                            ii+1) + " AND `subject_id` IN (SELECT `subject_id` FROM `subject_details` WHERE `type`='Lab')"
+                        
+                        reslab1 = db.selectOne(qry)
+                        if reslab is None and reslab1 is None:
+                            lis.append(sublis[ii])
+                            resultlist.append(sublis[ii])
+                            lis.append(sublis[ii])
+                            resultlist.append(sublis[ii])
+                            break
+                    else:
+                        lis.append(sublis[ii])
+                        resultlist.append(sublis[ii])
+                        break
+
+
+                elif typelist[ii] != "Mini Project":
+                    # print("================")
+                    # print("================")
+                    # print("================")
+                    # print("================")
+
+                    # print(resultlist.count(sublis[ii]) ,"!@#$========", hlist[ii])
+                    # print(lis,sublis[ii])
+                    if resultlist.count(sublis[ii]) < hlist[ii]:
+                        count = lis.count(sublis[ii])
+                        if hlist[ii] / 5 > count:
+                            # print("*************************************")
+                            if hlist[ii] // 5 < 3:
+                                if lis[-1] != sublis[ii]:
+                                    lis.append(sublis[ii])
+                                    resultlist.append(sublis[ii])
+                                    break
+                            else:
+                                count_num=0
+                                for io in result:
+                                    if io.count(sublis[ii])>1:
+                                        count_num+=1
+                                if count_num>=hlist[ii] // 5+1:
+                                    pass
+                                else:
+                                    lis.append(sublis[ii])
+                                    resultlist.append(sublis[ii])
+                                    break
+                        else:
+                            if sublis[ii] not in lis:
+                             if lis[-1] != sublis[ii] or len(lis)==4 or len(result)>=3:
+                                    lis.append(sublis[ii])
+                                    resultlist.append(sublis[ii])
+                                    break
+                            elif len(result)>3:
+                                
+                                if lis[-1] != sublis[ii] or len(lis)==4 or len(result)>=3:
+                                    lis.append(sublis[ii])
+                                    resultlist.append(sublis[ii])
+                                    break
+        result.append(lis)
+        print(len(resultlist),"+_+_+_+_+_+_+")
+        # print("^^^^^^^^^^^^^^^^^^^")
+        
+    print ("=========================================       b   ")
+    print (resultlist)
+    print (result)
+
+    mon1 = result[0]
+    print("MON : ",mon1)
+    tue1 = result[1]
+    wed1 = result[2]
+    thur1 = result[3]
+    fri1 = result[4]
+
+    for i in range(0, 6):
+        qry = "INSERT INTO `timetable` VALUES(NULL,'" + str(mon1[i]) + "','Monday','" + str(i + 1) + "','"+str(sem)+"')"
+        val = (mon1[i], "Monday", i + 1)
+        db.insert(qry)
+    for i in range(0, 6):
+        qry = "INSERT INTO `timetable` VALUES(NULL,'" + str(tue1[i]) + "','Tuesday','" + str(i + 1) + "','"+str(sem)+"')"
+        val = (tue1[i], "Tuesday", i + 1)
+        db.insert(qry)
+    for i in range(0, 6):
+        qry = "INSERT INTO `timetable` VALUES(NULL,'" + str(wed1[i]) + "','Wednesday','" + str(i + 1) + "','"+str(sem)+"')"
+        val = (wed1[i], "Wednesday", i + 1)
+        db.insert(qry)
+    for i in range(0, 6):
+        qry = "INSERT INTO `timetable` VALUES(NULL,'" + str(thur1[i]) + "','Thursday','" + str(i + 1) + "','"+str(sem)+"')"
+        val = (thur1[i], "Thursday", i + 1)
+        db.insert(qry)
+    for i in range(0, 6):
+        qry = "INSERT INTO `timetable` VALUES(NULL,'" + str(fri1[i]) + "','Friday','" + str(i + 1) + "','"+str(sem)+"')"
+        val = (fri1[i], "Friday", i + 1)
+        db.insert(qry)
+
+    qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Monday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+        dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+    mon1 = db.select(qry)
+    qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Tuesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+        dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+    tue1 = db.select(qry)
+
+    qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Wednesday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+        dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+    wed1 = db.select(qry)
+    qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Thursday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+        dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+    thur1 = db.select(qry)
+    qry = "SELECT `timetable`.`time_table_id`,`subject`.`subject_name`,`staff`.`staff_name` FROM `timetable` JOIN `subject` ON `subject`.`subject_id`=`timetable`.`subject_id` LEFT JOIN `sub_allocate` ON `subject`.`subject_id`=`sub_allocate`.`sub_id` LEFT JOIN `staff` ON `sub_allocate`.`staff_id`=`staff`.`staff_id` WHERE `timetable`.`day`='Friday' AND `timetable`.`subject_id` IN(SELECT `subject_id` FROM `subject` WHERE course_id='" + str(
+        dept) + "' AND semester_id='" + str(sem) + "') ORDER BY `time_table_id`"
+    fri1 = db.select(qry)
+
+    return render_template("hod/generation_timetable_new.html",mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sem=sem)
+    # return render_template("admin/generation_timetable_copy.html",mon=mon1,tue=tue1,wed=wed1,thur=thur1,fri=fri1,sat=sat1,data=res,sem=sem)
+
+def g1(cid,sem):
+    jq = jackal_copy()
+    m = grandmaster()
+    rows, cols = (5, 6)
+
+    arr = [[0] * cols] * rows
+    # print(arr)
+
+    list = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    for i in range(len(list)):
+        day=list[i]
+
+        tor = jq.getlabsubid(str(sem), cid)  # list of subjectid
+        # print("Subjects : ", tor)
+        tor_copy=tor
+
+        hr=1
+        while(hr<7):
+        # for hr in range(1,7):
+            temp_hr=hr
+            subid=random.choice(tor_copy)
+            # print("SSS", subid)
+            hr=jq.logman_new(day, subid['subject_id'], hr, cid, sem)
+            if hr!=temp_hr:         #       checking whether timetable added or not
+                tor_copy.remove(subid)
+    # print("Overr")
+
+    db=Db()
+    dd=db.select("select subject.* from subject inner join timetable on subject.subject_id=timetable.subject_id where subject.course_id='"+str(cid)+"' and subject.semester_id='"+str(sem)+"'")
+    # print("Last ", len(dd))
+    return "ok"
+
+
+
+
+if __name__ == '__main__':
+    app.run(port=5502,debug=True,host="0.0.0.0")

@@ -1,0 +1,45 @@
+{% extends 'hod/homepage2.html' %}
+{% block body %}
+
+
+
+
+<form action="" method="post">
+    <table>
+        <tr>
+            <th>SUBJECT</th>
+            <td><select class="form-control" name="sub" id="">
+                    <option value="select">select</option>
+                    {%for i in data['subject']%}
+                    <option value="{{i['subject_id']}}">{{i['subject_name']}}</option>
+                    {%endfor%}
+                </select></td>
+        </tr>
+      
+        <tr>
+            <th>STAFF</th>
+            <td><select class="form-control" name="staff" id="">
+                    <option value="select">select</option>
+                    {%for i in data['s']%}
+                    <option value="{{i['staff_id']}}">{{i['staff_name']}}</option>
+                    {%endfor%}
+                </select></td>
+        </tr>
+        <tr><td align="center " colspan="2" >
+            <input  class="btn btn-outline-info"  type="submit" name="sub" id="">
+        </td></tr>
+    </table>
+</form>
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

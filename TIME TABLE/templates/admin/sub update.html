@@ -1,0 +1,59 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+
+<body><form action="/editsubject1/{{ data['subject_id'] }}" method="post" enctype="multipart/form-data">
+    <table class="table table-striped table-bordered" style="margin-left: 50%">
+  <tr>
+    <th  scope="row">Subject Name</th>
+    <td ><label for="textfield"></label>
+      <input type="text" name="textfield" class="form-control" id="textfield" required value="{{ data['subject_name'] }}"/></td>
+  </tr>
+ <tr>
+    <th width="125" scope="row">Course</th>
+    <td width="237"><label for="course"></label>
+     <select name="course" class="form-control" required>
+         {% for i in d %}
+         <option value="{{ i['course_id'] }}" {% if data['course_id']==i['course_id'] %}selected{% endif %}>{{ i['course_name'] }}</option>
+         {% endfor %}
+     </select> </td>
+  </tr>
+  <tr>
+    <th scope="row">semester</th>
+    <td><label for="textfield7"></label>
+      <label for="select"></label>
+      <select name="select" id="select" class="form-control">
+
+        <option {% if data['semester']|string == "1" %} selected {% endif %} value="1">I semester </option>
+        <option {% if data['semester']|string == "2" %}selected{% endif %} value="2">II semester</option>
+        <option {% if data['semester']|string == "3" %}selected{% endif %} value="3">III semester</option>
+        <option {% if data['semester']|string == "4" %}selected{% endif %} value="4">IV semester</option>
+        <option {% if data['semester']|string == "5" %}selected{% endif %} value="5">V semester</option>
+        <option {% if data['semester']|string == "6" %}selected{% endif %} value="6">VI semester</option>
+      </select></td>
+  </tr>
+         <tr>
+    <th scope="row">Type</th>
+    <td>
+      <label for="select"></label>
+      <select name="t"  class="form-control" required>
+        <option selected="selected" value="">Select</option>
+        <option {% if data['type']=="Subject" %}selected{% endif %}>Subject</option>
+        <option {% if data['type']=="Lab" %}selected{% endif %}>Lab</option>
+        <option {% if data['type']=="Mini Project" %}selected{% endif %}>Mini Project</option>
+
+      </select></td>
+  </tr>
+
+        <tr>
+    <th width="125" scope="row">Hours/Week</th>
+    <td width="237"><label for="textfield"></label>
+      <input type="number" name="hw"  required class="form-control" required value="{{data['lh']}}"/></td>
+  </tr>
+  <tr>
+    <th colspan="2" scope="row"><center><input type="submit" name="button" id="button" value="Update" class="btn btn-primary" /></center></th>
+  </tr>
+</table>
+</form>
+</body>
+{% endblock %}

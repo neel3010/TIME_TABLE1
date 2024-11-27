@@ -1,0 +1,27 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+<body><form action="" method="post" enctype="multipart/form-data">
+    <table width="378" class="table table-striped" style="margin-left: 50%">
+  <tr>
+    <th width="125" scope="row">Department</th>
+    <td width="237"><label for="dept" ></label>
+     <select name="dept" class="form-control" required>
+         {% for i in data %}
+         <option value="{{ i['department_id'] }}">{{ i['department_name'] }}</option>
+         {% endfor %}
+     </select> </td>
+  </tr>
+  <tr>
+    <th width="125" scope="row">Course Name</th>
+    <td width="237"><label for="textfield"></label>
+      <input type="text" name="textfield" id="textfield" class="form-control" required/></td>
+  </tr>
+
+  <tr>
+      <th colspan="2" scope="row"><center><input type="submit" name="button" id="button" value="Submit" class="btn btn-primary"/></center></th>
+  </tr>
+</table>
+</form>
+</body>
+{% endblock %}

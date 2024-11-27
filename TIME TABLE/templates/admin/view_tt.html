@@ -1,0 +1,30 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+
+<body>
+<form id="form1" name="form1" method="post" action="">
+  <table width="926" border="1" class="table table-striped" style="margin-left: 50%">
+    <tr>
+      <th width="30" scope="col">#</th>
+      <th width="51" scope="col">Subject Name</th>
+      <th width="56" scope="col">day</th>
+      <th width="66" scope="col">hour</th>
+
+{#      <th width="38" scope="col">Photo</th>#}
+
+    </tr>
+      {% for i in data %}
+    <tr>
+      <td>&nbsp;{{ loop.index }}</td>
+      <td>&nbsp;{{ i['subject_name'] }}</td>
+      <td>&nbsp;{{ i['day'] }}</td>
+      <td> {{ i['hour'] }}&nbsp;</td>
+{#      <td></td>#}
+
+    </tr>
+      {% endfor %}
+  </table>
+</form>
+</body>
+{% endblock %}

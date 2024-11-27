@@ -1,0 +1,22 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+<body>
+<form id="form1" name="form1" method="post" action="">
+  <table width="210" border="1" class="table table-striped table-bordered" style="margin-left: 50%">
+    <tr>
+      <th width="11" scope="col"><h3>#</h3></th>
+      <th width="132" scope="col">STAFF NAME</th>
+      <th width="132" scope="col">DATE TIME</th>
+    </tr>
+       {% for i in data['vv'] %}
+    <tr>
+      <td>&nbsp;{{ loop.index }}</td>
+      <td>&nbsp;{{ i['staff_name'] }}</td>
+      <td>&nbsp;{{ i['datetime'] }}</td>
+      
+      {% endfor %}
+  </table>
+</form>
+</body>
+{% endblock %}

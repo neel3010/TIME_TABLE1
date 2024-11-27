@@ -1,0 +1,88 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+<body><form action="/adminviewtimetablepost" method="post"><table class="table table-bordered">
+     <tr>
+    <th>Department</th>
+    <td><label for="select"></label>
+      <select name="select1" id="select1" class="form-control">
+       <option>select</option>
+           {% for k in data %}
+          <option value="{{ k['course_id']}}"> {{ k['course_name'] }}</option>
+          {% endfor  %}
+      </select></td>
+  </tr>
+  <tr>
+    <th>semester</th>
+    <td><label for="select"></label>
+      <select name="select" id="select" class="form-control">
+           <option>select</option>
+           <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+      </select></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><input type="submit" name="button" id="button" value="View" class="btn btn-success"/></td>
+    </tr>
+</table>
+    <div align="center">
+      <h3>semester {{ sem }}</h3>
+  		<table class="table table-bordered" >
+  <tbody>
+    <tr align="center">
+      <th width="156" scope="col">Days/Hours</th>
+      <th >1</th>
+      <th >2</th>
+      <th >3</th>
+      <th >4</th>
+      <th >5</th>
+      <th >6</th>
+{#        <th></th>#}
+    </tr>
+
+    <tr align="center">
+      <th scope="row">Monday</th>
+    {% for i in mon %}
+        <td><a href="/edit_tt/{{ i['timetable_id'] }}">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</a></td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Tuesday</th>
+       {% for i in tue %}
+      <td><a href="/edit_tt/{{ i['timetable_id'] }}">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</a></td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Wednesday</th>
+       {% for i in wed %}
+      <td><a href="/edit_tt/{{ i['timetable_id'] }}">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</a></td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Thursday</th>
+      {% for i in thur %}
+      <td><a href="/edit_tt/{{ i['timetable_id'] }}">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</a></td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Friday</th>
+      {% for i in fri %}
+{#          {% if len(fri)=='6': %}#}
+
+      <td><a href="/edit_tt/{{ i['timetable_id'] }}">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</a></td>
+        {% endfor %}
+    </tr>
+{#   <tr align="center">#}
+{#      <th scope="row">Saturday</th>#}
+{#      {% for i in sat %}#}
+{#      <td><a href="/edit_tt/{{ i['timetable_id'] }}">{{ i["subject_name"] }}-{{ i['faculty_name'] }}</a></td>#}
+{#        {% endfor %}#}
+{#    </tr>#}
+  </tbody></table></div>
+</form>
+</body>
+{% endblock %}

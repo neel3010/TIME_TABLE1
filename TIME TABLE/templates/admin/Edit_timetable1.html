@@ -1,0 +1,35 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+<body><form action="/edit_tt_post" method="post"><table class="table table-striped" style="margin-left: 50%">
+  <tr>
+    <th scope="col">Date</th>
+    <th scope="col"><label for="textfield"></label>
+      <input type="date" name="textfield" id="textfield"  class="form-control"  /></th>
+  </tr>
+  <tr>
+    <th>Subject</td>
+    <td><label for="select"></label>
+      <select name="select" id="select" class="form-control">
+          {% for i in data2 %}
+          <option value="{{ i['subject_id'] }}"> {{ i['subject_name'] }}</option>
+          {% endfor %}
+      </select></td>
+  </tr>
+  <tr>
+    <th>Day</td>
+    <td><label for="textfield2"></label>
+      <input type="text" name="textfield2" id="textfield2"  class="form-control" value="{{ data['day'] }}" /></td>
+  </tr>
+  <tr>
+    <th>Hour</td>
+    <td><label for="textfield3"></label>
+      <input type="text" name="textfield3" id="textfield3"  class="form-control" value="{{data['hour'] }}" /></td>
+  </tr>
+<tr>
+    <td colspan="2" align="center"><input type="submit" name="button2" id="button2" value="Update" class="btn btn-success" /></td>
+    </tr>
+</table>
+</form>
+</body>
+{% endblock %}

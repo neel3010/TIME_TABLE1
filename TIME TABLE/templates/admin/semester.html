@@ -1,0 +1,24 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+<body>
+    <form action="" method="post" enctype="multipart/form-data">
+        <table width="378" class="table table-striped" style="margin-left: 50%">
+            <tr>
+                <th width="125" scope="row">semester</th>
+                <td width="237"><label for="textfield"> </label>
+                    <input type="textfield" name="sem" class="form-control" required>
+                </td>
+            </tr>
+
+
+            <tr>
+                <th colspan="2" scope="row">
+                    <center><input type="submit" name="button" id="button" value="Submit" class="btn btn-primary" />
+                    </center>
+                </th>
+            </tr>
+        </table>
+    </form>
+</body>
+{% endblock %}

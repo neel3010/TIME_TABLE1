@@ -1,0 +1,31 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+
+<body>
+    <form action="/ADMINHOME5/{{ data[0]['batch_id'] }}" method="post" enctype="multipart/form-data">
+        <table width="378" class="table table-striped" style="margin-left: 50%">
+            <tr>
+                <th width="125" scope="row">START YEAR</th>
+                <td width="237"><label for="textfield"></label>
+                    <input type="text" name="start" id="textfield" value="{{ data[0]['start_year'] }}"
+                        class="form-control" required />
+                </td>
+            </tr>
+            <tr>
+                <th width="125" scope="row">END YEAR</th>
+                <td width="237"><label for="textfield"></label>
+                    <input type="text" name="end" id="textfield" value="{{ data[0]['end_year'] }}"
+                        class="form-control" required />
+                </td>
+            </tr>
+            <tr>
+                <th colspan="2" scope="row">
+                    <center><input type="submit" name="button" id="button" value="update" class="btn btn-primary" />
+                    </center>
+                </th>
+            </tr>
+        </table>
+    </form>
+</body>
+{% endblock %}

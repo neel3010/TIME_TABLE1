@@ -1,0 +1,40 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+
+<body>
+<form id="form1" name="form1" method="post" action="">
+  <table width="926" border="1" class="table table-striped" style="margin-left: 50%">
+    <tr>
+      <th width="30" scope="col">#</th>
+      <th width="51" scope="col">Staff Name</th>
+      <th width="56" scope="col">Subject</th>
+      <th width="66" scope="col">Contact Number</th>
+      <th width="84" scope="col">Qualification</th>
+      <th width="56" scope="col">Email-id</th>
+      <th width="41" scope="col">Address</th>
+      <th width="41" scope="col">Department</th>
+
+
+{#      <th width="38" scope="col">Photo</th>#}
+
+    </tr>
+      {% for i in data %}
+    <tr>
+      <td>&nbsp;{{ loop.index }}</td>
+      <td>&nbsp;{{ i['staff_name'] }}<br><br> <img src="{{ i['image'] }}" width="200" height="200"/></td>
+      <td>Dept: {{ i['department_name'] }}<br>Course: {{ i['course_name'] }}<br>Sub: {{ i['subject_name'] }}</td>
+      <td>&nbsp;{{ i['phone'] }}</td>
+      <td> {{ i['qualification'] }}&nbsp;</td>
+      <td>&nbsp;{{ i['email'] }}</td>
+      <td>&nbsp;{{ i['place'] }}<br/>{{ i['district'] }}</td>
+      <td>&nbsp;{{ i['department_name'] }}</td>
+
+{#      <td></td>#}
+
+    </tr>
+      {% endfor %}
+  </table>
+</form>
+</body>
+{% endblock %}

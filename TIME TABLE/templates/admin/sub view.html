@@ -1,0 +1,39 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+
+<body>
+  <form id="form1" name="form1" method="post" action="searchviewsubject">
+    <table class="table table-striped table-bordered" style="margin-left: 50%" border="1">
+      
+
+      <tr>
+        <th scope="col">
+          <h3>#</h3>
+        </th>
+        <th scope="col">Subject Name</th>
+        <th scope="col">Course Name</th>
+
+        <th scope="col">Type and LH </th>
+
+        <th scope="col">&nbsp;</th>
+      </tr>
+      {% for i in val %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ i['subject_name'] }}</td>
+        <td>{{ i['course_name'] }}</td>
+
+        <td>{{ i['type'] }} - {{i['lh']}}H/W</td>
+
+        <td>
+          <p><a href="/editsubjecttsr?id={{ i['subject_id'] }}" class="btn btn-info">Edit</a></p>
+          <p><a href="/deletesubject/{{ i['subject_id'] }}" onclick="return confirm('Are you sure?')"
+              class="btn btn-danger">Delete</a></p>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </form>
+</body>
+{% endblock %}

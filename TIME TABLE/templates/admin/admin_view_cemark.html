@@ -1,0 +1,35 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+
+<body>
+<form id="form1" name="form1" method="post" action="">
+  <table width="926" border="1" class="table table-striped" style="margin-left: 50%">
+    <tr>
+      <th width="30" scope="col">#</th>
+      <th width="51" scope="col">Staff </th>
+      <th width="51" scope="col">Student </th>
+      <th width="51" scope="col">course </th>
+      <th width="51" scope="col">subject </th>
+      <th width="56" scope="col">Mark</th>
+      <th width="41" scope="col">Date time</th>
+
+{#      <th width="38" scope="col">Photo</th>#}
+
+    </tr>
+      {% for i in data %}
+    <tr>
+      <td>&nbsp;{{ loop.index }}</td>
+      <td>&nbsp;{{ i['staff_name'] }}<br><br> <img src="{{ i['image'] }}" width="200" height="200"/></td>
+      <td>&nbsp;{{ i['student_name'] }}<br><br> <img src="{{ i['photo'] }}" width="200" height="200"/></td>
+      <td>&nbsp;{{ i['course_name'] }}</td>
+      <td>&nbsp;{{ i['subject_name'] }}</td>      
+      <td>&nbsp;{{ i['mark'] }}</td>
+      <td> {{ i['date_time'] }}&nbsp;</td>
+     
+    </tr>
+      {% endfor %}
+  </table>
+</form>
+</body>
+{% endblock %}

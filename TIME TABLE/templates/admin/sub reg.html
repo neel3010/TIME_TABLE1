@@ -1,0 +1,56 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+
+<body><form action="/addsub" method="post" enctype="multipart/form-data">
+    <table width="878" align="center" class="table table-striped table-bordered" style="margin-left: 50%">
+  <tr>
+    <th width="125" scope="row">Subject Name</th>
+    <td width="237"><label for="textfield"></label>
+      <input type="text" name="textfield" id="textfield" required class="form-control"/></td>
+  </tr>
+   <tr>
+    <th width="125" scope="row">Course</th>
+    <td width="237">
+     <select name="course" id="couy" class="form-control">
+         {% for i in data %}
+         <option value="{{ i['course_id'] }}">{{ i['course_name'] }}</option>
+         {% endfor %}
+     </select> </td>
+  </tr>
+  <tr>
+    <th scope="row">semester</th>
+    <td>
+      <label for="select"></label>
+      <select name="sem" id="select" class="form-control">
+
+        <option selected="selected" value="1">Select</option>
+        {% for i in data1%}
+        <option value="{{i['sem_id']}}">{{i['semester']}}</option>
+        {%endfor%}
+      </select></td>
+  </tr> <tr>
+    <th scope="row">Type</th>
+    <td>
+      <label for="select"></label>
+      <select name="t"  class="form-control" required>
+        <option selected="selected" value="">Select</option>
+        <option>Subject</option>
+        <option>Lab</option>
+
+      </select></td>
+  </tr>
+  <tr>
+    <th width="125" scope="row">Lecture Hours</th>
+    <td width="237"><label for="textfield"></label>
+      <input type="text" name="lecture_hour" id="textfield" required class="form-control"/></td>
+  </tr>
+
+   
+  
+    <th colspan="2" scope="row"><center><input type="submit" name="button" id="button" value="Submit" class="btn btn-primary"/></center></th>
+  </tr>
+</table>
+</form>
+</body>
+{% endblock %}

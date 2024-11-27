@@ -1,0 +1,22 @@
+{% extends 'admin/homepage.html' %}
+{% block body %}
+
+<body><form action="/ADMINHOME3/{{ data['department_id'] }}" method="post" enctype="multipart/form-data">
+    <table width="378" class="table table-striped" style="margin-left: 50%">
+  <tr>
+    <th scope="row">Department Name</th>
+    <td><label for="textfield"></label>
+      <input type="text" name="textfield" id="textfield" value="{{ data['department_name'] }}" class="form-control" required/></td>
+  </tr>
+  <tr>
+    <th scope="row">Details</th>
+    <td><label for="textfield7"></label>
+      <input type="text" name="textfield7" id="textfield7" value="{{ data['details'] }}" class="form-control" required/></td>
+  </tr>
+  <tr>
+      <th colspan="2" scope="row"><center><input type="submit" name="button" id="button" value="Update" class="btn btn-primary"/></center></th>
+  </tr>
+</table>
+</form>
+</body>
+{% endblock %}

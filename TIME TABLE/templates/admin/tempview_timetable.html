@@ -1,0 +1,54 @@
+{% extends "admintemplate.html" %}
+{% block body %}
+
+<body><form action="/view_temp_ttpost" method="post"><table class="table table-striped" style="margin-left: 50%">
+  <tr>
+    <td>Department</td>
+    <td><label for="select"></label>
+      <select name="select" id="select"  class="form-control">
+          <option>select</option>
+           {% for k in data %}
+          <option value="{{ k['department_id']}}"> {{ k['name'] }}</option>
+          {% endfor  %}
+      </select></td>
+  </tr>
+  <tr>
+    <td>semester</td>
+    <td><label for="select2"></label>
+      <select name="select2" id="select2" class="form-control">
+           <option>select</option>
+           <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+      </select></td>
+  </tr>
+<tr>
+    <td colspan="2"><input type="submit" value="Search" class="btn btn-success"/></td>
+</tr>
+</table>
+<table class="table table-bordered">
+  <tr>
+    <th  height="29" scope="col">Day/Hour</th>
+    <th  scope="col">1</th>
+    <th  scope="col">2</th>
+    <th  scope="col">3</th>
+    <th  scope="col">4</th>
+    <th  scope="col">5</th>
+    <th  scope="col">6</th>
+  </tr>
+  <tr>
+  <th scope="row">Monday</th>
+{% for i in  mon %}
+        <td>{{ i[1] }}-{{ i[2] }}</td>
+      {% endfor %}
+
+
+  </tr>
+</table>
+
+</form>
+</body>
+{% endblock %}

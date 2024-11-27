@@ -1,0 +1,98 @@
+{% extends 'hod/homepage2.html' %}
+{% block body %}
+
+<body>
+<script>
+    function validate() {
+        var crs=document.getElementById("select1").value;
+        var sem=document.getElementById("select").value;
+        if (crs=="select"){
+            alert("Choose Course");
+            return false;
+        }
+        if(sem=="select"){
+            alert("Choose semester");
+            return false;
+        }
+        return true;
+    }
+</script>
+
+<form action="/generatetimetable_newpost" onsubmit="return validate()" method="post"><table class="table table-bordered">
+     <tr>
+    <th>Course</th>
+    <td><label for="select"></label>
+      <select name="select1" class="form-control">
+       <option>select</option>
+           {% for k in data %}
+          <option value="{{ k['course_id']}}"> {{ k['course_name'] }}</option>
+          {% endfor  %}
+      </select></td>
+  </tr>
+  <tr>
+    <th scope="row">semester</th>
+    <td>
+      <label for="select"></label> 
+      <select name="sem" id="select" class="form-control">
+        <option selected="selected" value="1">Select</option>
+        {% for i in data1 %}
+        <option value="{{i['sem_id']}}">{{i['semester']}}</option>
+        {%endfor%}
+      </select></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><input type="submit" name="button" id="button" value="Generate" class="btn btn-success"/></td>
+    </tr>
+</table>
+
+{% if mon %}
+    <div align="center">
+      <h3>semester {{ semester }}</h3>
+  		<table class="table table-bordered" >
+  <tbody>
+    <tr >
+      <th width="156" scope="col">Days/Hours</th>
+      <th width="118" scope="col">1</th>
+      <th width="126" scope="col">2</th>
+      <th width="116" scope="col">3</th>
+      <th width="116" scope="col">4</th>
+      <th width="116" scope="col">5</th>
+      <th width="118" scope="col">6</th>
+    </tr>
+
+    <tr align="center">
+      <th scope="row">Monday</th>
+    {% for i in mon %}
+      <td>{{ i["subject_name"] }}</td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Tuesday</th>
+       {% for i in tue %}
+      <td>{{ i["subject_name"] }}</td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Wednesday</th>
+       {% for i in wed %}
+      <td>{{ i["subject_name"] }}</td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Thursday</th>
+      {% for i in thur %}
+      <td>{{ i["subject_name"] }}</td>
+        {% endfor %}
+    </tr>
+    <tr align="center">
+      <th scope="row">Friday</th>
+      {% for i in fri %}
+      <td>{{ i["subject_name"] }}</td>
+        {% endfor %}
+    </tr>
+  </tbody></table></div>
+{% endif %}
+</form>
+
+</body>
+{% endblock %}

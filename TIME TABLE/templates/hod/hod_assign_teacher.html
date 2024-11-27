@@ -1,0 +1,53 @@
+{% extends 'hod/homepage2.html' %}
+{% block body %}
+
+
+
+
+<form action="" method="post">
+    <table>
+        <tr>
+            <th>BATCH</th>
+            <td><select class="form-control" name="batch" id="">
+                    <option value="select">select</option>
+                    {%for i in data['b']%}
+                    <option value="{{i['batch_id']}}">{{i['start_year']}}-{{i['end_year']}}</option>
+                    {%endfor%}
+                </select></td>
+        </tr>
+        <tr>
+            <th>COURSE</th>
+            <td><select class="form-control" name="course" id="">
+                    <option value="select">select</option>
+                    {%for i in data['c']%}
+                    <option value="{{i['course_id']}}">{{i['course_name']}}</option>
+                    {%endfor%}
+                </select></td>
+        </tr><br>
+        <tr><br>
+            <th>STAFF</th>
+            <td><select class="form-control" name="staff" id="">
+                    <option value="select">select</option>
+                    {%for i in data['s']%}
+                    <option value="{{i['staff_id']}}">{{i['staff_name']}}</option>
+                    {%endfor%}
+                </select></td>
+        </tr>
+        <tr><td align="center " colspan="2">
+            <input class="btn btn-outline-info" type="submit" name="sub" id="">
+        </td></tr>
+    </table>
+</form>
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'hod/homepage2.html' %}
+{% block body %}
+
+
+<body>
+<div align="center">
+<form action="" method="post" enctype="multipart/form-data">
+    <table  align="center" class="table table-striped table-bordered" style="margin-left: 50%" width="1000">
+  <tr>
+    <th scope="row">Name</th>
+    <td><label for="textfield"></label>
+      <input type="text" name="textfield" id="textfield" class="form-control" required value="{{ data['staff_name'] }}"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Photo</th>
+    <td><label for="fileField"></label>
+        <img src="{{ data['image'] }}" height="100" width="100">
+      <input type="file" name="fileField" id="fileField" class="form-control" value="{{ data['image'] }}"/></td>
+  </tr>
+
+
+  <tr>
+    <th scope="row">Qualification</th>
+    <td><label for="textfield3"></label>
+      <input type="text" name="textfield3" id="textfield3" required class="form-control" value="{{ data['qualification'] }}"/></td>
+  </tr>
+  <tr>
+    <th scope="row">District </th>
+    <td><label for="select"></label>
+      <select name="select" id="select" class="form-control">
+        <option {% if data['district']=="Thiruvananthapuram" %}  selected {% endif %}>Thiruvananthapuram</option>
+        <option {% if data['district']=="Kollam" %}  selected {% endif %}>Kollam</option>
+        <option {% if data['district']=="Alapuzha" %}  selected {% endif %}>Alapuzhha</option>
+        <option {% if data['district']=="Pathanamthitta" %}  selected {% endif %}>Pathanamthitta</option>
+        <option {% if data['district']=="Kottayam" %}  selected {% endif %}>Kottayam</option>
+        <option {% if data['district']=="Idukki" %}  selected {% endif %}>Idukki</option>
+        <option {% if data['district']=="Ernakulam" %}  selected {% endif %}>Ernakulam</option>
+        <option {% if data['district']=="Thrissur" %}  selected {% endif %}>Thrissur</option>
+        <option {% if data['district']=="Palakkad" %}  selected {% endif %}>Palakkad</option>
+        <option {% if data['district']=="Malappuram" %}  selected {% endif %}>Malappuram</option>
+        <option {% if data['district']=="Kozhikode" %}  selected {% endif %}>Kozhikode</option>
+        <option {% if data['district']=="Wayanad" %}  selected {% endif %}>Wayanad</option>
+        <option {% if data['district']=="Kannur" %}  selected {% endif %}>Kannur</option>
+        <option {% if data['district']=="Kasargod" %}  selected {% endif %}>Kasargod</option>
+      </select></td>
+  </tr>
+  <tr>
+    <th scope="row">Place</th>
+    <td><label for="textfield2"></label>
+      <input type="text" name="textfield2" id="textfield2"class="form-control" required value="{{ data['place'] }}"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Email-id</th>
+    <td><label for="textfield7"></label>
+      <input type="email" name="textfield7" id="textfield7" class="form-control" required value="{{ data['email'] }}"/></td>
+  </tr>
+  <tr>
+    <th scope="row">Contact Number</th>
+    <td><label for="textfield8"></label>
+      <input type="tel" name="textfield8" id="textfield8" class="form-control" required pattern="[6-9][0-9]{9}" value="{{ data['phone'] }}"/></td>
+  </tr>
+
+    <th colspan="2" scope="row"><label></label><div align="center" > <center><input type="submit" class="btn btn-primary" name="button" id="button" value="Update" /></center></div></th>
+    </tr>
+</table>
+</form>
+</div>
+</body>
+{% endblock %}

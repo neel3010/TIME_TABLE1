@@ -1,0 +1,56 @@
+{% extends 'hod/homepage2.html' %}
+{% block body %}
+
+{% if data['view'] %}
+
+<body><form action="/ADMINHOME2/{{ data['hod_id'] }}" method="post" enctype="multipart/form-data">
+<center>
+    <table  align="center" class="table table-striped " style="margin-right: 50%"  width="2000">
+
+  <tr>
+    <td>
+     <a href="{{ data['view'][0]['image'] }}"> <img src="{{ data['view'][0]['image'] }}" width="150" height="150" readonly/></a></td>
+     
+  </tr>
+  
+  <tr>
+    <th scope="row">Name</th>
+    <td><label for="textfield"></label>
+      <input type="text" name="textfield" id="textfield" class="form-control" value="{{ data['view'][0]['staff_name'] }}" readonly /></td>
+  </tr>
+  
+
+
+  <tr>
+    <th scope="row">Qualification</th>
+    <td><label for="textfield3"></label>
+      <input type="text" name="textfield3" id="textfield3" class="form-control" value="{{ data['view'][0]['qualification'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">District</th>
+    <td><label for="textfield4"></label>
+      <input type="text" name="textfield4" id="textfield4" class="form-control" value="{{ data['view'][0]['district'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">Place</th>
+    <td><label for="textfield4"></label>
+      <input type="text" name="textfield4" id="textfield4" class="form-control" value="{{ data['view'][0]['place'] }}" readonly/></td>
+  </tr>
+
+    <th scope="row">Email-id</th>
+    <td><label for="textfield7"></label>
+      <input type="text" name="textfield7" id="textfield7" class="form-control" value="{{ data['view'][0]['email'] }}" readonly/></td>
+  </tr>
+  <tr>
+    <th scope="row">Contact Number</th>
+    <td><label for="textfield8"></label>
+      <input type="text" name="textfield8" id="textfield8" class="form-control" value="{{ data['view'][0]['phone'] }}" readonly/></td>
+  </tr>
+
+
+</table>
+</center>
+</form>
+</body>
+{%endif%}
+{% endblock %}

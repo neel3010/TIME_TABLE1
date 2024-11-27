@@ -1,0 +1,58 @@
+{% extends 'hod/homepage2.html' %}
+{% block body %}
+
+<body>
+
+<form id="form2" name="form1" method="post" action="/search_alloc">
+     <table width="926" border="1" class="table table-striped table-bordered" style="margin-left: 50%">
+    <tr>
+      <th width="30" scope="col">Course</th>
+      <th width="51" scope="col">
+          <select name="c">
+              {% for i in data1 %}
+              <option value="{{ i['course_id'] }}">{{ i['course_name'] }} </option>
+              {% endfor %}
+          </select>
+      </th>
+      <th width="66" scope="col">semester</th>
+             <th width="51" scope="col">
+          <select name="s">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+          </select>
+      </th>
+
+           <th width="66" scope="col"><input type="submit" value="Search"></th>
+
+
+
+    </tr>
+  </table>
+</form>
+
+     <form id="form1" name="form1" method="post" action="">
+  <table width="926" border="1" class="table table-striped table-bordered" style="margin-left: 50%">
+    <tr>
+      <th width="30" scope="col">#</th>
+      <th width="51" scope="col">Staff Name</th>
+      <th width="66" scope="col">Subject</th>
+
+{#      <th width="38" scope="col">Photo</th>#}
+      <th width="39" scope="col">&nbsp;</th>
+    </tr>
+      {% for i in data %}
+    <tr>
+      <td>&nbsp;{{ loop.index }}</td>
+      <td>&nbsp;{{ i['staff_name'] }}</td>
+      <td>&nbsp;{{ i['subject_name'] }}</td>
+      <td><p><a href="/delete_allocate/{{ i['allocate_id'] }}" onclick="return confirm('are you sure')" class="btn btn-danger">Delete</a></p></td>
+    </tr>
+      {% endfor %}
+  </table>
+</form>
+</body>
+{% endblock %}

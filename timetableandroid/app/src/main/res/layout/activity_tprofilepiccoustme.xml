@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="5dp"
+    android:layout_height="match_parent"
+    tools:context=".Tprofilepiccoustme">
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="#80FFFFFF"
+        app:cardElevation="1dp"
+        android:layout_height="wrap_content"
+
+        android:layout_gravity="center">
+        <!-- ... (ImageView and TextView inside CardView remain the same) -->
+
+
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="15dp">
+
+
+            <LinearLayout
+                android:layout_width="228dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="186dp"
+                    android:layout_height="120dp"
+                    app:srcCompat="@drawable/pro" />
+
+                <TextView
+                    android:id="@+id/tvname"
+                    android:layout_width="228dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="serif-monospace"
+                    android:text="fjsdfsd"
+                    android:gravity="center"
+                    android:textColor="#000"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+
+
+
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000"
+                android:fontFamily="serif-monospace"
+
+                android:layout_marginLeft="0dp"
+                android:textStyle="bold"
+                android:text="TextView" />
+
+        </TableRow>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

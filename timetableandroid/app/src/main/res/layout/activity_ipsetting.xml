@@ -1,0 +1,43 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical"
+    android:padding="20dp"
+    android:background="@drawable/ipst"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:textStyle="italic"
+        android:fontFamily="serif-monospace"
+        android:layout_height="wrap_content"
+        android:text="Enter the IP Address" />
+
+    <EditText
+        android:id="@+id/etip"
+        android:layout_width="250dp"
+        android:layout_height="47dp"
+        android:layout_gravity="center"
+        android:ems="10"
+        android:fontFamily="serif-monospace"
+        android:hint="Enter ip address:"
+        android:textColor="@color/black">
+
+        <requestFocus />
+    </EditText>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btip"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="116dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/square"
+        android:fontFamily="serif-monospace"
+        android:text="GET IP"
+        android:textColor="#000" />
+
+</LinearLayout>

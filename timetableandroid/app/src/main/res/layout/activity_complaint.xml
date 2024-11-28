@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@drawable/compbg"
+    tools:context=".Complaint">
+
+
+    <EditText
+        android:id="@+id/complaint"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:paddingLeft="20dp"
+        android:textColor="#2B2727"
+        android:textStyle="bold"
+        android:fontFamily="serif-monospace"
+
+        android:layout_marginTop="80dp"
+        android:textColorHint="#2B2727"
+        android:background="@drawable/square"
+
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="Complaints" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/cbtn"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="#fff"
+        android:focusable="true"
+        android:textStyle="bold"
+        android:layout_height="wrap_content"
+        android:text="Send" />
+
+    <ListView
+        android:id="@+id/view"
+        android:layout_width="350dp"
+        android:focusable="true"
+        android:layout_height="124dp"
+        android:fontFamily="serif-monospace"
+
+        android:layout_marginTop="20dp"
+        android:padding="20dp" />
+
+</LinearLayout>
